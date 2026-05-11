@@ -17,7 +17,7 @@ public class ItemVenda {
     private Long idItemVenda;
 
     @ManyToOne
-    @JoinColumn(name = "item_id")
+    @JoinColumn(name = "id_item")
     private Item item;
 
     private Integer quantidade;
