@@ -1,5 +1,18 @@
 package br.ifg.urt.barbearia_api.model;
 
-public class Servico
-{
-}
+import jakarta.persistence.Entity;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public class Servico extends Item {
+
+        private Integer duracaoMinutos;
+    }
+
