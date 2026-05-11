@@ -1,18 +1,17 @@
 package br.ifg.urt.barbearia_api.model;
 
 import jakarta.persistence.Entity;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public class Servico extends Item {
+public class Servico extends Item {
 
-        private Integer duracaoMinutos;
+    private Integer duracaoMinutos;
+
+    public Integer getDuracaoMinutos() {
+        return duracaoMinutos;
     }
 
+    public void setDuracaoMinutos(Integer duracaoMinutos) {
+        this.duracaoMinutos = duracaoMinutos;
+    }
+}

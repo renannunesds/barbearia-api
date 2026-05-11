@@ -1,18 +1,17 @@
 package br.ifg.urt.barbearia_api.model;
 
 import jakarta.persistence.Entity;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-    @Entity
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public class Produto extends Item {
+@Entity
+public class Produto extends Item {
 
-        private Integer quantidadeEstoque;
+    private Integer quantidadeEstoque;
+
+    public Integer getQuantidadeEstoque() {
+        return quantidadeEstoque;
     }
 
+    public void setQuantidadeEstoque(Integer quantidadeEstoque) {
+        this.quantidadeEstoque = quantidadeEstoque;
+    }
+}
