@@ -3,7 +3,6 @@ package br.ifg.urt.barbearia_api.service;
 import br.ifg.urt.barbearia_api.dto.request.AgendamentoRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.AgendamentoResponseDTO;
 import br.ifg.urt.barbearia_api.mapper.AgendamentoMapper;
-import br.ifg.urt.barbearia_api.model.Agendamento;
 import br.ifg.urt.barbearia_api.model.Barbeiro;
 import br.ifg.urt.barbearia_api.repository.AgendamentoRepository;
 import br.ifg.urt.barbearia_api.repository.BarbeiroRepository;

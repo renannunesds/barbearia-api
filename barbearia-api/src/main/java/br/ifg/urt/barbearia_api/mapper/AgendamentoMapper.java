@@ -2,7 +2,6 @@ package br.ifg.urt.barbearia_api.mapper;
 
 import br.ifg.urt.barbearia_api.dto.request.AgendamentoRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.AgendamentoResponseDTO;
-import br.ifg.urt.barbearia_api.model.Agendamento;
 import org.springframework.stereotype.Component;
 
 @Component
