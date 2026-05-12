@@ -1,91 +1,107 @@
 package br.ifg.urt.barbearia_api.model;
 
-<<<<<<< HEAD
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-
-@Entity
-@Table(name = "barbeiros")
-public class Barbeiro extends Usuario {
-
-    @Column(nullable = false, length = 100)
-    private String especialidade;
-
-    @Column(nullable = false)
-    private Boolean ativo;
-
-    public Barbeiro() {
-    }
-
-    public Barbeiro(Long id, String nome, String email, String telefone, String senha,
-                    String especialidade, Boolean ativo) {
-        super(id, nome, email, telefone, senha);
-        this.especialidade = especialidade;
-        this.ativo = ativo;
-    }
-
-    public String getEspecialidade() {
-        return especialidade;
-    }
-
-    public void setEspecialidade(String especialidade) {
-        this.especialidade = especialidade;
-    }
-
-    public Boolean getAtivo() {
-        return ativo;
-    }
-
-    public void setAtivo(Boolean ativo) {
-        this.ativo = ativo;
-    }
-
-    public void ativarBarbeiro() {
-        this.ativo = true;
-    }
-
-    public void desativarBarbeiro() {
-        this.ativo = false;
-=======
 import jakarta.persistence.*;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
-public class Barbeiro {
+public class Agendamento {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idBarbeiro;
+    private Long idAgendamento;
 
-    private String nome;
+    private LocalDate data;
+    private LocalTime horario;
+    private String status; // Ex: PENDENTE, CONCLUIDO, CANCELADO
 
-    private String telefone;
+    // Relacionamento com Cliente (conforme seu diagrama)
+    @ManyToOne
+    @JoinColumn(name = "cliente_id")
+    private Cliente cliente;
 
-    // getters e setters
+    // Relacionamento com Barbeiro (conforme seu diagrama)
+    @ManyToOne
+    @JoinColumn(name = "barbeiro_id")
+    private Barbeiro barbeiro;
 
-    public Long getIdBarbeiro() {
-        return idBarbeiro;
+    // Relacionamento com Servico (Estava faltando na sua print!)
+    @ManyToOne
+    @JoinColumn(name = "servico_id")
+    private Servico servico;
+
+    // Relacionamento 1 para 1 com Pagamento
+    // O 'mappedBy' indica que o mapeamento principal está na classe Pagamento
+    @OneToOne(mappedBy = "agendamento", cascade = CascadeType.ALL)
+    private Pagamento pagamento;
+
+    // --- CONSTRUTORES ---
+    public Agendamento() {
     }
 
-    public void setIdBarbeiro(Long idBarbeiro) {
-        this.idBarbeiro = idBarbeiro;
+    // --- GETTERS E SETTERS (Essenciais para o Spring funcionar) ---
+
+    public Long getIdAgendamento() {
+        return idAgendamento;
     }
 
-    public String getNome() {
-        return nome;
+    public void setIdAgendamento(Long idAgendamento) {
+        this.idAgendamento = idAgendamento;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public LocalDate getData() {
+        return data;
     }
 
-    public String getTelefone() {
-        return telefone;
+    public void setData(LocalDate data) {
+        this.data = data;
     }
 
-    public void setTelefone(String telefone) {
-        this.telefone = telefone;
->>>>>>> aefe403 (feat: as classes Agendamento, Barbeiro)
+    public LocalTime getHorario() {
+        return horario;
+    }
+
+    public void setHorario(LocalTime horario) {
+        this.horario = horario;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+
+    public Barbeiro getBarbeiro() {
+        return barbeiro;
+    }
+
+    public void setBarbeiro(Barbeiro barbeiro) {
+        this.barbeiro = barbeiro;
+    }
+
+    public Servico getServico() {
+        return servico;
+    }
+
+    public void setServico(Servico servico) {
+        this.servico = servico;
+    }
+
+    public Pagamento getPagamento() {
+        return pagamento;
+    }
+
+    public void setPagamento(Pagamento pagamento) {
+        this.pagamento = pagamento;
     }
 }
