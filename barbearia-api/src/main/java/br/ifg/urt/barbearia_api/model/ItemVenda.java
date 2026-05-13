@@ -1,9 +1,11 @@
 package br.ifg.urt.barbearia_api.model;
 
 import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 
 @Entity
+@Table(name = "itens_venda")
 public class ItemVenda {
 
     @Id
@@ -11,14 +13,20 @@ public class ItemVenda {
     private Long idItemVenda;
 
     @ManyToOne
-    @JoinColumn(name = "id_item")
+    @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
+    @Column(nullable = false)
     private Integer quantidade;
 
+    @Column(nullable = false)
     private BigDecimal valorUnitario;
 
+    @Column(nullable = false)
     private BigDecimal subtotal;
+
+    public ItemVenda() {
+    }
 
     public Long getIdItemVenda() {
         return idItemVenda;
