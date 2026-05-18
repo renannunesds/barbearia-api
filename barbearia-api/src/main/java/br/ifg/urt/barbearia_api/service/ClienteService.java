@@ -14,17 +14,14 @@ public class ClienteService {
     @Autowired
     private ClienteRepository clienteRepository;
 
-    // Salvar cliente
     public Cliente salvar(Cliente cliente) {
         return clienteRepository.save(cliente);
     }
 
-    // Listar todos
     public List<Cliente> listarTodos() {
         return clienteRepository.findAll();
     }
 
-    // Buscar por ID
     public Cliente buscarPorId(Long id) {
 
         Optional<Cliente> cliente = clienteRepository.findById(id);
@@ -36,7 +33,6 @@ public class ClienteService {
         return null;
     }
 
-    // Atualizar cliente
     public Cliente atualizar(Long id, Cliente clienteAtualizado) {
 
         Cliente clienteExistente = buscarPorId(id);
@@ -55,7 +51,6 @@ public class ClienteService {
         return null;
     }
 
-    // Deletar cliente
     public void deletar(Long id) {
         clienteRepository.deleteById(id);
     }

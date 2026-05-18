@@ -14,17 +14,14 @@ public class BarbeiroService {
     @Autowired
     private BarbeiroRepository barbeiroRepository;
 
-    // Salvar barbeiro
     public Barbeiro salvar(Barbeiro barbeiro) {
         return barbeiroRepository.save(barbeiro);
     }
 
-    // Listar todos
     public List<Barbeiro> listarTodos() {
         return barbeiroRepository.findAll();
     }
 
-    // Buscar por ID
     public Barbeiro buscarPorId(Long id) {
 
         Optional<Barbeiro> barbeiro = barbeiroRepository.findById(id);
@@ -36,7 +33,6 @@ public class BarbeiroService {
         return null;
     }
 
-    // Atualizar barbeiro
     public Barbeiro atualizar(Long id, Barbeiro barbeiroAtualizado) {
 
         Barbeiro barbeiroExistente = buscarPorId(id);
@@ -56,7 +52,6 @@ public class BarbeiroService {
         return null;
     }
 
-    // Ativar barbeiro
     public void ativarBarbeiro(Long id) {
 
         Barbeiro barbeiro = buscarPorId(id);
@@ -67,7 +62,6 @@ public class BarbeiroService {
         }
     }
 
-    // Desativar barbeiro
     public void desativarBarbeiro(Long id) {
 
         Barbeiro barbeiro = buscarPorId(id);
@@ -78,7 +72,6 @@ public class BarbeiroService {
         }
     }
 
-    // Deletar barbeiro
     public void deletar(Long id) {
         barbeiroRepository.deleteById(id);
     }
