@@ -1,4 +1,23 @@
 package br.ifg.urt.barbearia_api.repository;
 
-public class AgendamentoRepository {
+import br.ifg.urt.barbearia_api.model.Agendamento;
+import br.ifg.urt.barbearia_api.model.Barbeiro;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+@Repository
+public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> {
+
+    // Feito exatamente com a estrutura de @Query que o Ryan usou no exemplo
+    @Query("SELECT COUNT(a) > 0 FROM Agendamento a WHERE a.barbeiro = :barbeiro AND a.data = :data AND a.horario = :horario")
+    boolean existsByBarbeiroAndDataAndHorario(
+            @Param("barbeiro") Barbeiro barbeiro,
+            @Param("data") LocalDate data,
+            @Param("horario") LocalTime horario
+    );
 }
