@@ -25,10 +25,8 @@ public class AgendamentoService {
     @Autowired
     private ServicoRepository servicoRepository;
 
-    // Código limpo recebendo a entidade direto, sem precisar de Mapper ou DTOs que não existem
     public Agendamento criarAgendamento(Agendamento agendamento) {
 
-        // 1. Valida se o barbeiro já tem agendamento na mesma data e horário
         boolean barbeiroOcupado = agendamentoRepository.existsByBarbeiroAndDataAndHorario(
                 agendamento.getBarbeiro(),
                 agendamento.getData(),
@@ -39,10 +37,8 @@ public class AgendamentoService {
             throw new RuntimeException("Este barbeiro já possui um agendamento neste horário!");
         }
 
-        // 2. Define o status padrão
         agendamento.setStatus("PENDENTE");
 
-        // 3. Salva direto a entidade no banco
         return agendamentoRepository.save(agendamento);
     }
 
