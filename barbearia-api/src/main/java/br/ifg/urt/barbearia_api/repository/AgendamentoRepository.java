@@ -13,7 +13,6 @@ import java.time.LocalTime;
 @Repository
 public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> {
 
-
     @Query("SELECT COUNT(a) > 0 FROM Agendamento a WHERE a.barbeiro = :barbeiro AND a.data = :data AND a.horario = :horario")
     boolean existsByBarbeiroAndDataAndHorario(
             @Param("barbeiro") Barbeiro barbeiro,
