@@ -1,57 +1,81 @@
 package br.ifg.urt.barbearia_api.service;
 
+import br.ifg.urt.barbearia_api.dto.request.ClienteRequestDTO;
+import br.ifg.urt.barbearia_api.dto.response.ClienteResponseDTO;
+import br.ifg.urt.barbearia_api.mapper.ClienteMapper;
 import br.ifg.urt.barbearia_api.model.Cliente;
 import br.ifg.urt.barbearia_api.repository.ClienteRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ClienteService {
 
-    @Autowired
-    private ClienteRepository clienteRepository;
+    private final ClienteRepository repository;
+    private final ClienteMapper mapper;
 
-    public Cliente salvar(Cliente cliente) {
-        return clienteRepository.save(cliente);
+    public ClienteService(
+            ClienteRepository repository,
+            ClienteMapper mapper) {
+
+        this.repository = repository;
+        this.mapper = mapper;
     }
 
-    public List<Cliente> listarTodos() {
-        return clienteRepository.findAll();
+    // Buscar todos
+    public List<ClienteResponseDTO> findAll() {
+
+        List<Cliente> clientes = repository.findAll();
+
+        return mapper.toResponseDTOList(clientes);
     }
 
-    public Cliente buscarPorId(Long id) {
+    // Buscar por ID
+    public ClienteResponseDTO findById(Long id) {
 
-        Optional<Cliente> cliente = clienteRepository.findById(id);
+        Cliente cliente = repository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Cliente não encontrado"));
 
-        if (cliente.isPresent()) {
-            return cliente.get();
-        }
-
-        return null;
+        return mapper.toResponseDTO(cliente);
     }
 
-    public Cliente atualizar(Long id, Cliente clienteAtualizado) {
+    // Criar cliente
+    public ClienteResponseDTO create(ClienteRequestDTO dto) {
 
-        Cliente clienteExistente = buscarPorId(id);
+        Cliente cliente = mapper.toEntity(dto);
 
-        if (clienteExistente != null) {
+        Cliente clienteSalvo = repository.save(cliente);
 
-            clienteExistente.setNome(clienteAtualizado.getNome());
-            clienteExistente.setEmail(clienteAtualizado.getEmail());
-            clienteExistente.setTelefone(clienteAtualizado.getTelefone());
-            clienteExistente.setSenha(clienteAtualizado.getSenha());
-            clienteExistente.setObservacoes(clienteAtualizado.getObservacoes());
-
-            return clienteRepository.save(clienteExistente);
-        }
-
-        return null;
+        return mapper.toResponseDTO(clienteSalvo);
     }
 
-    public void deletar(Long id) {
-        clienteRepository.deleteById(id);
+    // Atualizar cliente
+    public ClienteResponseDTO update(Long id, ClienteRequestDTO dto) {
+
+        Cliente clienteExistente = repository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Cliente não encontrado"));
+
+        clienteExistente.setNome(dto.nome());
+        clienteExistente.setEmail(dto.email());
+        clienteExistente.setTelefone(dto.telefone());
+        clienteExistente.setSenha(dto.senha());
+        clienteExistente.setObservacoes(dto.observacoes());
+
+        Cliente atualizado = repository.save(clienteExistente);
+
+        return mapper.toResponseDTO(atualizado);
+    }
+
+    // Deletar cliente
+    public void delete(Long id) {
+
+        Cliente cliente = repository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Cliente não encontrado"));
+
+        repository.delete(cliente);
     }
 }

@@ -1,55 +1,80 @@
 package br.ifg.urt.barbearia_api.service;
 
+import br.ifg.urt.barbearia_api.dto.request.UsuarioRequestDTO;
+import br.ifg.urt.barbearia_api.dto.response.UsuarioResponseDTO;
+import br.ifg.urt.barbearia_api.mapper.UsuarioMapper;
 import br.ifg.urt.barbearia_api.model.Usuario;
 import br.ifg.urt.barbearia_api.repository.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UsuarioService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository repository;
+    private final UsuarioMapper mapper;
 
-    public Usuario salvar(Usuario usuario) {
-        return usuarioRepository.save(usuario);
+    public UsuarioService(
+            UsuarioRepository repository,
+            UsuarioMapper mapper) {
+
+        this.repository = repository;
+        this.mapper = mapper;
     }
 
-    public List<Usuario> listarTodos() {
-        return usuarioRepository.findAll();
+    // Buscar todos
+    public List<UsuarioResponseDTO> findAll() {
+
+        List<Usuario> usuarios = repository.findAll();
+
+        return mapper.toResponseDTOList(usuarios);
     }
 
-    public Usuario buscarPorId(Long id) {
-        Optional<Usuario> usuario = usuarioRepository.findById(id);
+    // Buscar por ID
+    public UsuarioResponseDTO findById(Long id) {
 
-        if (usuario.isPresent()) {
-            return usuario.get();
-        }
+        Usuario usuario = repository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Usuário não encontrado"));
 
-        return null;
+        return mapper.toResponseDTO(usuario);
     }
 
-    public Usuario atualizar(Long id, Usuario usuarioAtualizado) {
+    // Criar usuário
+    public UsuarioResponseDTO create(UsuarioRequestDTO dto) {
 
-        Usuario usuarioExistente = buscarPorId(id);
+        Usuario usuario = mapper.toEntity(dto);
 
-        if (usuarioExistente != null) {
+        Usuario usuarioSalvo = repository.save(usuario);
 
-            usuarioExistente.setNome(usuarioAtualizado.getNome());
-            usuarioExistente.setEmail(usuarioAtualizado.getEmail());
-            usuarioExistente.setTelefone(usuarioAtualizado.getTelefone());
-            usuarioExistente.setSenha(usuarioAtualizado.getSenha());
-
-            return usuarioRepository.save(usuarioExistente);
-        }
-
-        return null;
+        return mapper.toResponseDTO(usuarioSalvo);
     }
 
-    public void deletar(Long id) {
-        usuarioRepository.deleteById(id);
+    // Atualizar usuário
+    public UsuarioResponseDTO update(Long id, UsuarioRequestDTO dto) {
+
+        Usuario usuarioExistente = repository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Usuário não encontrado"));
+
+        usuarioExistente.setNome(dto.nome());
+        usuarioExistente.setEmail(dto.email());
+        usuarioExistente.setTelefone(dto.telefone());
+        usuarioExistente.setSenha(dto.senha());
+
+        Usuario atualizado = repository.save(usuarioExistente);
+
+        return mapper.toResponseDTO(atualizado);
+    }
+
+    // Deletar usuário
+    public void delete(Long id) {
+
+        Usuario usuario = repository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Usuário não encontrado"));
+
+        repository.delete(usuario);
     }
 }

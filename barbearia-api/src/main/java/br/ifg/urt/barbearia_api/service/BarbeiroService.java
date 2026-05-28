@@ -1,78 +1,106 @@
 package br.ifg.urt.barbearia_api.service;
 
+import br.ifg.urt.barbearia_api.dto.request.BarbeiroRequestDTO;
+import br.ifg.urt.barbearia_api.dto.response.BarbeiroResponseDTO;
+import br.ifg.urt.barbearia_api.mapper.BarbeiroMapper;
 import br.ifg.urt.barbearia_api.model.Barbeiro;
 import br.ifg.urt.barbearia_api.repository.BarbeiroRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class BarbeiroService {
 
-    @Autowired
-    private BarbeiroRepository barbeiroRepository;
+    private final BarbeiroRepository repository;
+    private final BarbeiroMapper mapper;
 
-    public Barbeiro salvar(Barbeiro barbeiro) {
-        return barbeiroRepository.save(barbeiro);
+    public BarbeiroService(
+            BarbeiroRepository repository,
+            BarbeiroMapper mapper) {
+
+        this.repository = repository;
+        this.mapper = mapper;
     }
 
-    public List<Barbeiro> listarTodos() {
-        return barbeiroRepository.findAll();
+    // Buscar todos
+    public List<BarbeiroResponseDTO> findAll() {
+
+        List<Barbeiro> barbeiros = repository.findAll();
+
+        return mapper.toResponseDTOList(barbeiros);
     }
 
-    public Barbeiro buscarPorId(Long id) {
+    // Buscar por ID
+    public BarbeiroResponseDTO findById(Long id) {
 
-        Optional<Barbeiro> barbeiro = barbeiroRepository.findById(id);
+        Barbeiro barbeiro = repository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Barbeiro não encontrado"));
 
-        if (barbeiro.isPresent()) {
-            return barbeiro.get();
-        }
-
-        return null;
+        return mapper.toResponseDTO(barbeiro);
     }
 
-    public Barbeiro atualizar(Long id, Barbeiro barbeiroAtualizado) {
+    // Criar barbeiro
+    public BarbeiroResponseDTO create(BarbeiroRequestDTO dto) {
 
-        Barbeiro barbeiroExistente = buscarPorId(id);
+        Barbeiro barbeiro = mapper.toEntity(dto);
 
-        if (barbeiroExistente != null) {
+        Barbeiro barbeiroSalvo = repository.save(barbeiro);
 
-            barbeiroExistente.setNome(barbeiroAtualizado.getNome());
-            barbeiroExistente.setEmail(barbeiroAtualizado.getEmail());
-            barbeiroExistente.setTelefone(barbeiroAtualizado.getTelefone());
-            barbeiroExistente.setSenha(barbeiroAtualizado.getSenha());
-            barbeiroExistente.setEspecialidade(barbeiroAtualizado.getEspecialidade());
-            barbeiroExistente.setAtivo(barbeiroAtualizado.getAtivo());
-
-            return barbeiroRepository.save(barbeiroExistente);
-        }
-
-        return null;
+        return mapper.toResponseDTO(barbeiroSalvo);
     }
 
+    // Atualizar barbeiro
+    public BarbeiroResponseDTO update(Long id, BarbeiroRequestDTO dto) {
+
+        Barbeiro barbeiroExistente = repository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Barbeiro não encontrado"));
+
+        barbeiroExistente.setNome(dto.nome());
+        barbeiroExistente.setEmail(dto.email());
+        barbeiroExistente.setTelefone(dto.telefone());
+        barbeiroExistente.setSenha(dto.senha());
+        barbeiroExistente.setEspecialidade(dto.especialidade());
+        barbeiroExistente.setAtivo(dto.ativo());
+
+        Barbeiro atualizado = repository.save(barbeiroExistente);
+
+        return mapper.toResponseDTO(atualizado);
+    }
+
+    // Ativar barbeiro
     public void ativarBarbeiro(Long id) {
 
-        Barbeiro barbeiro = buscarPorId(id);
+        Barbeiro barbeiro = repository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Barbeiro não encontrado"));
 
-        if (barbeiro != null) {
-            barbeiro.setAtivo(true);
-            barbeiroRepository.save(barbeiro);
-        }
+        barbeiro.ativarBarbeiro();
+
+        repository.save(barbeiro);
     }
 
+    // Desativar barbeiro
     public void desativarBarbeiro(Long id) {
 
-        Barbeiro barbeiro = buscarPorId(id);
+        Barbeiro barbeiro = repository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Barbeiro não encontrado"));
 
-        if (barbeiro != null) {
-            barbeiro.setAtivo(false);
-            barbeiroRepository.save(barbeiro);
-        }
+        barbeiro.desativarBarbeiro();
+
+        repository.save(barbeiro);
     }
 
-    public void deletar(Long id) {
-        barbeiroRepository.deleteById(id);
+    // Deletar
+    public void delete(Long id) {
+
+        Barbeiro barbeiro = repository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Barbeiro não encontrado"));
+
+        repository.delete(barbeiro);
     }
 }
