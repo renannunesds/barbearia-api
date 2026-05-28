@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -18,22 +19,6 @@
 
     <name>barbearia-api</name>
     <description>API Barbearia</description>
-
-    <url/>
-    <licenses>
-        <license/>
-    </licenses>
-
-    <developers>
-        <developer/>
-    </developers>
-
-    <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
-    </scm>
 
     <properties>
         <java.version>21</java.version>
@@ -95,6 +80,13 @@
             <version>${org.mapstruct.version}</version>
         </dependency>
 
+        <!-- PROCESSOR -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>${org.mapstruct.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
     </dependencies>
 
@@ -115,19 +107,15 @@
 
                 <configuration>
 
+                    <source>21</source>
+                    <target>21</target>
+
                     <annotationProcessorPaths>
 
-                        <!-- MAPSTRUCT -->
                         <path>
                             <groupId>org.mapstruct</groupId>
                             <artifactId>mapstruct-processor</artifactId>
                             <version>${org.mapstruct.version}</version>
-                        </path>
-
-                        <!-- LOMBOK -->
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
                         </path>
 
                     </annotationProcessorPaths>
