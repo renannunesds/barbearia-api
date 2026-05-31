@@ -1,9 +1,11 @@
 package br.ifg.urt.barbearia_api.model;
 
 import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 
 @Entity
+@Table(name = "itens")
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Item {
 
@@ -11,9 +13,17 @@ public abstract class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idItem;
 
+    @Column(nullable = false, length = 100)
     private String nome;
+
+    @Column(length = 255)
     private String descricao;
+
+    @Column(nullable = false)
     private BigDecimal valor;
+
+    public Item() {
+    }
 
     public Long getIdItem() {
         return idItem;

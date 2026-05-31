@@ -1,42 +1,64 @@
 package br.ifg.urt.barbearia_api.model;
 
-import jakarta.persistence.*;
-import java.util.List;
+import java.io.Serializable;
 
-@Entity
-public class Barbeiro {
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idBarbeiro;
+@Entity // Indica que esta classe é uma tabela no banco de dados
+@Table(name = "barbeiros") // Nome da tabela
+public class Barbeiro extends Usuario implements Serializable {
 
-    private String nome;
+    private static final long serialVersionUID = 1L;
 
-    private String telefone;
+    @Column(nullable = false, length = 100)
+    private String especialidade;
 
-    // getters e setters
+    @Column(nullable = false)
+    private Boolean ativo;
 
-    public Long getIdBarbeiro() {
-        return idBarbeiro;
+    // Construtor padrão obrigatório para o JPA
+    public Barbeiro() {
     }
 
-    public void setIdBarbeiro(Long idBarbeiro) {
-        this.idBarbeiro = idBarbeiro;
+    public Barbeiro(Long id, String nome, String email, String telefone, String senha,
+                    String especialidade, Boolean ativo) {
+
+        super(id, nome, email, telefone, senha);
+
+        this.especialidade = especialidade;
+        this.ativo = ativo;
     }
 
-    public String getNome() {
-        return nome;
+    public String getEspecialidade() {
+        return especialidade;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setEspecialidade(String especialidade) {
+        this.especialidade = especialidade;
     }
 
-    public String getTelefone() {
-        return telefone;
+    public Boolean getAtivo() {
+        return ativo;
     }
 
-    public void setTelefone(String telefone) {
-        this.telefone = telefone;
+    public void setAtivo(Boolean ativo) {
+        this.ativo = ativo;
+    }
+
+    // Método de negócio
+    public void ativarBarbeiro() {
+        this.ativo = true;
+    }
+
+    // Método de negócio
+    public void desativarBarbeiro() {
+        this.ativo = false;
+    }
+
+    // Método auxiliar
+    public Boolean estaAtivo() {
+        return this.ativo != null && this.ativo;
     }
 }
