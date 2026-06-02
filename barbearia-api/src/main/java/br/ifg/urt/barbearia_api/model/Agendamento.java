@@ -1,12 +1,16 @@
 package br.ifg.urt.barbearia_api.model;
 
 import jakarta.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
 @Table(name = "agendamentos")
-public class Agendamento {
+public class Agendamento implements Serializable {
+
+    // 1. Padronização com o modelo do seu colega
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,9 +40,24 @@ public class Agendamento {
     @OneToOne(mappedBy = "agendamento", cascade = CascadeType.ALL)
     private Pagamento pagamento;
 
+    // Construtor padrão obrigatório para o JPA
     public Agendamento() {
     }
 
+    // 2. Construtor completo adicionado (Igual ao padrão do seu colega)
+    public Agendamento(Long idAgendamento, LocalDate data, LocalTime horario, String status,
+                       Cliente cliente, Barbeiro barbeiro, Servico servico, Pagamento pagamento) {
+        this.idAgendamento = idAgendamento;
+        this.data = data;
+        this.horario = horario;
+        this.status = status;
+        this.cliente = cliente;
+        this.barbeiro = barbeiro;
+        this.servico = servico;
+        this.pagamento = pagamento;
+    }
+
+    // Getters e Setters
     public Long getIdAgendamento() {
         return idAgendamento;
     }
@@ -99,7 +118,20 @@ public class Agendamento {
         return pagamento;
     }
 
+    // 3. Método auxiliar de segurança (Evita que o JPA duplique registros ou crie dados órfãos)
     public void setPagamento(Pagamento pagamento) {
         this.pagamento = pagamento;
+        if (pagamento != null && pagamento.getAgendamento() != this) {
+            pagamento.setAgendamento(this);
+        }
+    }
+
+    // 4. Métodos de negócio adicionados (Seguindo as boas práticas do seu colega)
+    public void cancelarAgendamento() {
+        this.status = "CANCELADO";
+    }
+
+    public void confirmarAgendamento() {
+        this.status = "CONFIRMADO";
     }
 }
