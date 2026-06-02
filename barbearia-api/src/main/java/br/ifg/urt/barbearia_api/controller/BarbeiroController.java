@@ -22,69 +22,53 @@ public class BarbeiroController {
         this.service = service;
     }
 
-    // Buscar todos
+    // Buscar todos os barbeiros
     @GetMapping
     public ResponseEntity<List<BarbeiroResponseDTO>> buscarTodos() {
-
         return ResponseEntity.ok(service.findAll());
     }
 
-    // Buscar por ID
+    // Buscar barbeiro por ID
     @GetMapping("/{id}")
-    public ResponseEntity<BarbeiroResponseDTO> buscarPorId(
-            @PathVariable Long id) {
-
+    public ResponseEntity<BarbeiroResponseDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));
     }
 
-    // Criar barbeiro
+    // Criar um novo barbeiro
     @PostMapping
-    public ResponseEntity<BarbeiroResponseDTO> criar(
-            @Valid @RequestBody BarbeiroRequestDTO dto) {
-
+    public ResponseEntity<BarbeiroResponseDTO> criar(@Valid @RequestBody BarbeiroRequestDTO dto) {
         BarbeiroResponseDTO novoBarbeiro = service.create(dto);
-
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(novoBarbeiro);
     }
 
-    // Atualizar barbeiro
+    // Atualizar os dados de um barbeiro
     @PutMapping("/{id}")
     public ResponseEntity<BarbeiroResponseDTO> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody BarbeiroRequestDTO dto) {
-
         return ResponseEntity.ok(service.update(id, dto));
     }
 
-    // Ativar barbeiro
+    // Ativar o status de um barbeiro
     @PatchMapping("/{id}/ativar")
-    public ResponseEntity<Void> ativarBarbeiro(
-            @PathVariable Long id) {
-
+    public ResponseEntity<Void> ativarBarbeiro(@PathVariable Long id) {
         service.ativarBarbeiro(id);
-
         return ResponseEntity.noContent().build();
     }
 
-    // Desativar barbeiro
+    // Desativar o status de um barbeiro
     @PatchMapping("/{id}/desativar")
-    public ResponseEntity<Void> desativarBarbeiro(
-            @PathVariable Long id) {
-
+    public ResponseEntity<Void> desativarBarbeiro(@PathVariable Long id) {
         service.desativarBarbeiro(id);
-
         return ResponseEntity.noContent().build();
     }
 
-    // Deletar barbeiro
+    // Deletar logicamente ou fisicamente um barbeiro do sistema
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(
-            @PathVariable Long id) {
-
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
         service.delete(id);
-
         return ResponseEntity.noContent().build();
     }
 }

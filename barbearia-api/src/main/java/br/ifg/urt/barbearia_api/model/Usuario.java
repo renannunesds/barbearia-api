@@ -1,7 +1,9 @@
 package br.ifg.urt.barbearia_api.model;
 
+import br.ifg.urt.barbearia_api.model.vo.EmailVO;
+import br.ifg.urt.barbearia_api.model.vo.TelefoneVO;
+import br.ifg.urt.barbearia_api.model.vo.SenhaVO;
 import jakarta.persistence.*;
-
 import java.io.Serializable;
 
 @Entity
@@ -18,19 +20,19 @@ public class Usuario implements Serializable {
     @Column(nullable = false, length = 100)
     protected String nome;
 
-    @Column(nullable = false, unique = true, length = 100)
-    protected String email;
+    @Embedded
+    protected EmailVO email;
 
-    @Column(nullable = false, length = 20)
-    protected String telefone;
+    @Embedded
+    protected TelefoneVO telefone;
 
-    @Column(nullable = false, length = 100)
-    protected String senha;
+    @Embedded
+    protected SenhaVO senha;
 
     public Usuario() {
     }
 
-    public Usuario(Long id, String nome, String email, String telefone, String senha) {
+    public Usuario(Long id, String nome, EmailVO email, TelefoneVO telefone, SenhaVO senha) {
         this.id = id;
         this.nome = nome;
         this.email = email;
@@ -38,43 +40,15 @@ public class Usuario implements Serializable {
         this.senha = senha;
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public String getNome() { return nome; }
+    public EmailVO getEmail() { return email; }
+    public TelefoneVO getTelefone() { return telefone; }
+    public SenhaVO getSenha() { return senha; }
 
-    public String getNome() {
-        return nome;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getTelefone() {
-        return telefone;
-    }
-
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setTelefone(String telefone) {
-        this.telefone = telefone;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
-    }
+    public void setId(Long id) { this.id = id; }
+    public void setNome(String nome) { this.nome = nome; }
+    public void setEmail(EmailVO email) { this.email = email; }
+    public void setTelefone(TelefoneVO telefone) { this.telefone = telefone; }
+    public void setSenha(SenhaVO senha) { this.senha = senha; }
 }

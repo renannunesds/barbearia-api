@@ -1,13 +1,15 @@
 package br.ifg.urt.barbearia_api.model;
 
+import br.ifg.urt.barbearia_api.model.vo.EmailVO;
+import br.ifg.urt.barbearia_api.model.vo.TelefoneVO;
+import br.ifg.urt.barbearia_api.model.vo.SenhaVO;
 import java.io.Serializable;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
-@Entity // Indica que esta classe é uma tabela no banco de dados
-@Table(name = "barbeiros") // Nome da tabela
+@Entity
+@Table(name = "barbeiros")
 public class Barbeiro extends Usuario implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -18,11 +20,10 @@ public class Barbeiro extends Usuario implements Serializable {
     @Column(nullable = false)
     private Boolean ativo;
 
-    // Construtor padrão obrigatório para o JPA
     public Barbeiro() {
     }
 
-    public Barbeiro(Long id, String nome, String email, String telefone, String senha,
+    public Barbeiro(Long id, String nome, EmailVO email, TelefoneVO telefone, SenhaVO senha,
                     String especialidade, Boolean ativo) {
 
         super(id, nome, email, telefone, senha);
@@ -47,17 +48,14 @@ public class Barbeiro extends Usuario implements Serializable {
         this.ativo = ativo;
     }
 
-    // Método de negócio
-    public void ativarBarbeiro() {
+    public void activarBarbeiro() {
         this.ativo = true;
     }
 
-    // Método de negócio
     public void desativarBarbeiro() {
         this.ativo = false;
     }
 
-    // Método auxiliar
     public Boolean estaAtivo() {
         return this.ativo != null && this.ativo;
     }
