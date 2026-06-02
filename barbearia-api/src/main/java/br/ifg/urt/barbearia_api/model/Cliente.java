@@ -1,9 +1,11 @@
 package br.ifg.urt.barbearia_api.model;
 
+import br.ifg.urt.barbearia_api.model.vo.EmailVO;
+import br.ifg.urt.barbearia_api.model.vo.TelefoneVO;
+import br.ifg.urt.barbearia_api.model.vo.SenhaVO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-
 import java.io.Serializable;
 
 @Entity
@@ -18,12 +20,14 @@ public class Cliente extends Usuario implements Serializable {
     public Cliente() {
     }
 
-    public Cliente(Long id, String nome, String email,
-                   String telefone, String senha,
+    public Cliente(Long id,
+                   String nome,
+                   EmailVO email,
+                   TelefoneVO telefone,
+                   SenhaVO senha,
                    String observacoes) {
 
         super(id, nome, email, telefone, senha);
-
         this.observacoes = observacoes;
     }
 
