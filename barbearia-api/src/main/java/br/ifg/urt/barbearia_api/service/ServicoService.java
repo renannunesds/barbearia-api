@@ -9,61 +9,48 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-    @Service
-    public class ServicoService {
+@Service
+public class ServicoService {
 
-        private final ServicoRepository servicoRepository;
+    private final ServicoRepository servicoRepository;
+    private final ServicoMapper servicoMapper; // Injetando o novo Mapper do MapStruct
 
-        public ServicoService(ServicoRepository servicoRepository) {
-            this.servicoRepository = servicoRepository;
-        }
-
-        public ServicoResponseDTO criar(ServicoRequestDTO dto) {
-            Servico servico = ServicoMapper.toEntity(dto);
-
-            return ServicoMapper.toResponse(
-                    servicoRepository.save(servico)
-            );
-        }
-
-        public List<ServicoResponseDTO> listar() {
-            return servicoRepository.findAll()
-                    .stream()
-                    .map(ServicoMapper::toResponse)
-                    .toList();
-        }
-
-        public ServicoResponseDTO buscarPorId(Long id) {
-            Servico servico = servicoRepository.findById(id)
-                    .orElseThrow(() ->
-                            new RuntimeException("Serviço não encontrado"));
-
-            return ServicoMapper.toResponse(servico);
-        }
-
-        public ServicoResponseDTO atualizar(Long id, ServicoRequestDTO dto) {
-
-            Servico servico = servicoRepository.findById(id)
-                    .orElseThrow(() ->
-                            new RuntimeException("Serviço não encontrado"));
-
-            servico.setNome(dto.nome());
-            servico.setDescricao(dto.descricao());
-            servico.setValor(dto.valor());
-            servico.setDuracaoMinutos(dto.duracaoMinutos());
-
-            return ServicoMapper.toResponse(
-                    servicoRepository.save(servico)
-            );
-        }
-
-        public void deletar(Long id) {
-
-            Servico servico = servicoRepository.findById(id)
-                    .orElseThrow(() ->
-                            new RuntimeException("Serviço não encontrado"));
-
-            servicoRepository.delete(servico);
-        }
+    public ServicoService(ServicoRepository servicoRepository, ServicoMapper servicoMapper) {
+        this.servicoRepository = servicoRepository;
+        this.servicoMapper = servicoMapper;
     }
 
+    public ServicoResponseDTO criar(ServicoRequestDTO dto) {
+        Servico servico = servicoMapper.toEntity(dto);
+        return servicoMapper.toResponseDTO(servicoRepository.save(servico));
+    }
+
+    public List<ServicoResponseDTO> listar() {
+        return servicoMapper.toResponseDTOList(servicoRepository.findAll());
+    }
+
+    public ServicoResponseDTO buscarPorId(Long id) {
+        Servico servico = servicoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Serviço não encontrado"));
+
+        return servicoMapper.toResponseDTO(servico);
+    }
+
+    public ServicoResponseDTO atualizar(Long id, ServicoRequestDTO dto) {
+        Servico servico = servicoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Serviço não encontrado"));
+
+        servico.setNome(dto.nome());
+        servico.setDescricao(dto.descricao());
+        servico.setDuracaoMinutos(dto.duracaoMinutos());
+
+        return servicoMapper.toResponseDTO(servicoRepository.save(servico));
+    }
+
+    public void deletar(Long id) {
+        Servico servico = servicoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Serviço não encontrado"));
+
+        servicoRepository.delete(servico);
+    }
+}

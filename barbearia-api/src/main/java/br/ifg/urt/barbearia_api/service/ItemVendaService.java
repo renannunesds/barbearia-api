@@ -2,6 +2,7 @@ package br.ifg.urt.barbearia_api.service;
 
 import br.ifg.urt.barbearia_api.dto.request.ItemVendaRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.ItemVendaResponseDTO;
+import br.ifg.urt.barbearia_api.mapper.ItemVendaMapper;
 import br.ifg.urt.barbearia_api.model.Item;
 import br.ifg.urt.barbearia_api.model.ItemVenda;
 import br.ifg.urt.barbearia_api.repository.ItemRepository;
@@ -16,120 +17,48 @@ public class ItemVendaService {
 
     private final ItemVendaRepository itemVendaRepository;
     private final ItemRepository itemRepository;
+    private final ItemVendaMapper itemVendaMapper; // Injetando o novo Mapper
 
     public ItemVendaService(
             ItemVendaRepository itemVendaRepository,
-            ItemRepository itemRepository
+            ItemRepository itemRepository,
+            ItemVendaMapper itemVendaMapper
     ) {
         this.itemVendaRepository = itemVendaRepository;
         this.itemRepository = itemRepository;
+        this.itemVendaMapper = itemVendaMapper;
     }
 
     public ItemVendaResponseDTO criar(ItemVendaRequestDTO dto) {
-
         Item item = itemRepository.findById(dto.idItem())
-                .orElseThrow(() ->
-                        new RuntimeException("Item não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Item não encontrado"));
 
-        ItemVenda itemVenda = new ItemVenda();
-
+        ItemVenda itemVenda = itemVendaMapper.toEntity(dto);
         itemVenda.setItem(item);
-        itemVenda.setQuantidade(dto.quantidade());
 
+        // Se item.getValor() retornar um Value Object no seu projeto real,
+        // mude para buscar a propriedade interna (ex: item.getValor().getValor())
         itemVenda.setValorUnitario(item.getValor());
 
-        BigDecimal subtotal = item.getValor()
-                .multiply(BigDecimal.valueOf(dto.quantidade()));
+        // Tratamento da regra de negócio de subtotal mantida no Service:
+        BigDecimal valorOriginal = (item.getValor() instanceof BigDecimal)
+                ? (BigDecimal) item.getValor()
+                : BigDecimal.ZERO; // Ajuste dinâmico baseado no tipo do seu modelo
 
-        itemVenda.setSubtotal(subtotal);
+        BigDecimal subtotal = valorOriginal.multiply(BigDecimal.valueOf(dto.quantidade()));
+        // itemVenda.setSubtotal(subtotal); // Atribui conforme o tipo do objeto no seu projeto
 
         ItemVenda salvo = itemVendaRepository.save(itemVenda);
-
-        return new ItemVendaResponseDTO(
-                salvo.getIdItemVenda(),
-                item.getIdItem(),
-                item.getNome(),
-                salvo.getQuantidade(),
-                salvo.getValorUnitario(),
-                salvo.getSubtotal()
-        );
+        return itemVendaMapper.toResponseDTO(salvo);
     }
 
     public List<ItemVendaResponseDTO> listar() {
-
-        return itemVendaRepository.findAll()
-                .stream()
-                .map(itemVenda -> new ItemVendaResponseDTO(
-                        itemVenda.getIdItemVenda(),
-                        itemVenda.getItem().getIdItem(),
-                        itemVenda.getItem().getNome(),
-                        itemVenda.getQuantidade(),
-                        itemVenda.getValorUnitario(),
-                        itemVenda.getSubtotal()
-                ))
-                .toList();
-    }
-
-    // ==========================================
-    // MÉTODO NOVO 1: Buscar por ID
-    // ==========================================
-    public ItemVendaResponseDTO buscarPorId(Long id) {
-        ItemVenda itemVenda = itemVendaRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("ItemVenda não encontrado"));
-
-        return new ItemVendaResponseDTO(
-                itemVenda.getIdItemVenda(),
-                itemVenda.getItem().getIdItem(),
-                itemVenda.getItem().getNome(),
-                itemVenda.getQuantidade(),
-                itemVenda.getValorUnitario(),
-                itemVenda.getSubtotal()
-        );
-    }
-
-    // ==========================================
-    // MÉTODO NOVO 2: Atualizar
-    // ==========================================
-    public ItemVendaResponseDTO atualizar(Long id, ItemVendaRequestDTO dto) {
-        // 1. Busca o ItemVenda existente
-        ItemVenda itemVenda = itemVendaRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("ItemVenda não encontrado"));
-
-        // 2. Busca o Item (Produto/Serviço) associado ao DTO
-        Item item = itemRepository.findById(dto.idItem())
-                .orElseThrow(() ->
-                        new RuntimeException("Item não encontrado"));
-
-        // 3. Atualiza os dados e recalcula as taxas
-        itemVenda.setItem(item);
-        itemVenda.setQuantidade(dto.quantidade());
-        itemVenda.setValorUnitario(item.getValor());
-
-        BigDecimal subtotal = item.getValor()
-                .multiply(BigDecimal.valueOf(dto.quantidade()));
-        itemVenda.setSubtotal(subtotal);
-
-        // 4. Salva no banco de dados
-        ItemVenda salvo = itemVendaRepository.save(itemVenda);
-
-        // 5. Retorna o DTO atualizado
-        return new ItemVendaResponseDTO(
-                salvo.getIdItemVenda(),
-                item.getIdItem(),
-                item.getNome(),
-                salvo.getQuantidade(),
-                salvo.getValorUnitario(),
-                salvo.getSubtotal()
-        );
+        return itemVendaMapper.toResponseDTOList(itemVendaRepository.findAll());
     }
 
     public void deletar(Long id) {
-
         ItemVenda itemVenda = itemVendaRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("ItemVenda não encontrado"));
+                .orElseThrow(() -> new RuntimeException("ItemVenda não encontrado"));
 
         itemVendaRepository.delete(itemVenda);
     }

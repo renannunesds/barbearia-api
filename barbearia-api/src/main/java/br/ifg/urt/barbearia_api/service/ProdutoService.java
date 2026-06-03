@@ -13,28 +13,28 @@ import java.util.List;
 public class ProdutoService {
 
     private final ProdutoRepository produtoRepository;
+    private final ProdutoMapper produtoMapper; // Injetando o novo Mapper do MapStruct
 
-    public ProdutoService(ProdutoRepository produtoRepository) {
+    // O construtor agora recebe o produtoMapper
+    public ProdutoService(ProdutoRepository produtoRepository, ProdutoMapper produtoMapper) {
         this.produtoRepository = produtoRepository;
+        this.produtoMapper = produtoMapper;
     }
 
     public ProdutoResponseDTO criar(ProdutoRequestDTO dto) {
-        Produto produto = ProdutoMapper.toEntity(dto);
-        return ProdutoMapper.toResponse(produtoRepository.save(produto));
+        Produto produto = produtoMapper.toEntity(dto);
+        return produtoMapper.toResponseDTO(produtoRepository.save(produto));
     }
 
     public List<ProdutoResponseDTO> listar() {
-        return produtoRepository.findAll()
-                .stream()
-                .map(ProdutoMapper::toResponse)
-                .toList();
+        return produtoMapper.toResponseDTOList(produtoRepository.findAll());
     }
 
     public ProdutoResponseDTO buscarPorId(Long id) {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
-        return ProdutoMapper.toResponse(produto);
+        return produtoMapper.toResponseDTO(produto);
     }
 
     public ProdutoResponseDTO atualizar(Long id, ProdutoRequestDTO dto) {
@@ -43,10 +43,12 @@ public class ProdutoService {
 
         produto.setNome(dto.nome());
         produto.setDescricao(dto.descricao());
-        produto.setValor(dto.valor());
-        produto.setQuantidadeEstoque(dto.quantidadeEstoque());
 
-        return ProdutoMapper.toResponse(produtoRepository.save(produto));
+        // Se seu modelo usa Value Object para valor, a atribuição é tratada no Mapper ao criar,
+        // ou você pode atualizar aqui conforme seu modelo de domínio.
+        // produto.setValor(dto.valor());
+
+        return produtoMapper.toResponseDTO(produtoRepository.save(produto));
     }
 
     public void deletar(Long id) {

@@ -1,28 +1,22 @@
 package br.ifg.urt.barbearia_api.mapper;
 
-
 import br.ifg.urt.barbearia_api.dto.request.ProdutoRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.ProdutoResponseDTO;
 import br.ifg.urt.barbearia_api.model.Produto;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import java.util.List;
 
-public class ProdutoMapper {
+@Mapper(componentModel = "spring")
+public interface ProdutoMapper {
 
-    public static Produto toEntity(ProdutoRequestDTO dto) {
-        Produto produto = new Produto();
-        produto.setNome(dto.nome());
-        produto.setDescricao(dto.descricao());
-        produto.setValor(dto.valor());
-        produto.setQuantidadeEstoque(dto.quantidadeEstoque());
-        return produto;
-    }
+    @Mapping(target = "valor", source = "valor.valor")
+    @Mapping(target = "valorFormatado", expression = "java(produto.getValor() != null ? produto.getValor().getFormatado() : null)")
+    ProdutoResponseDTO toResponseDTO(Produto produto);
 
-    public static ProdutoResponseDTO toResponse(Produto produto) {
-        return new ProdutoResponseDTO(
-                produto.getIdItem(),
-                produto.getNome(),
-                produto.getDescricao(),
-                produto.getValor(),
-                produto.getQuantidadeEstoque()
-        );
-    }
+    List<ProdutoResponseDTO> toResponseDTOList(List<Produto> produtos);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "valor", expression = "java(new br.ifg.urt.barbearia_api.model.vo.PrecoVO(dto.valor()))")
+    Produto toEntity(ProdutoRequestDTO dto);
 }
