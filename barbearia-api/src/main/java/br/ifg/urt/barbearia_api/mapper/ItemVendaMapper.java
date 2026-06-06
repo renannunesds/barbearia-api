@@ -10,18 +10,19 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ItemVendaMapper {
 
-    // Mapeia atributos que vêm de objetos internos (ex: extrai o valor monetário e dados do produto)
-    @Mapping(target = "valorUnitario", source = "valorUnitario.valor")
-    @Mapping(target = "subtotal", source = "subtotal.valor")
-    @Mapping(target = "produtoNome", source = "produto.nome")
-    @Mapping(target = "valorFormatado", expression = "java(itemVenda.getValorUnitario() != null ? itemVenda.getValorUnitario().getFormatado() : null)")
+    // Se o seu ItemVendaResponseDTO tiver o campo "produtoNome", descomente a linha abaixo.
+    // Caso dê erro nele de novo, pode deixar essa linha inteira comentada/removida.
+    // @Mapping(target = "produtoNome", source = "item.nome")
     ItemVendaResponseDTO toResponseDTO(ItemVenda itemVenda);
 
     List<ItemVendaResponseDTO> toResponseDTOList(List<ItemVenda> itensVenda);
 
-    // Ignora o ID gerado pelo banco e reconstrói os Value Objects usando expressões Java baseadas no DTO
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "valorUnitario", expression = "java(new br.ifg.urt.barbearia_api.model.vo.PrecoVO(dto.valorUnitario()))")
-    @Mapping(target = "produto", ignore = true) // Ignora o objeto Produto completo para ser associado via ID no Service
+    // Ignora a chave primária da entidade ao receber a requisição
+    @Mapping(target = "idItemVenda", ignore = true)
+    // Ignoramos os valores e o objeto do produto aqui, pois você irá associar e setar
+    // esses valores direto na sua classe Service usando o dto.idItem()
+    @Mapping(target = "valorUnitario", ignore = true)
+    @Mapping(target = "subtotal", ignore = true)
+    @Mapping(target = "item", ignore = true)
     ItemVenda toEntity(ItemVendaRequestDTO dto);
 }

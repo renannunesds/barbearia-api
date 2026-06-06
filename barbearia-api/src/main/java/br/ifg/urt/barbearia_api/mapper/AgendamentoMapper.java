@@ -9,11 +9,14 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface AgendamentoMapper {
 
-    // Avisa o MapStruct para ignorar o ID ao converter a requisição, pois o banco gera o ID sozinho
     @Mapping(target = "idAgendamento", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "cliente", ignore = true)
+    @Mapping(target = "barbeiro", ignore = true)
+    @Mapping(target = "servico", ignore = true)
+    @Mapping(target = "pagamento", ignore = true)
     Agendamento requestToEntity(AgendamentoRequestDTO dto);
 
-    // Mapeia os campos que estão dentro de outros objetos (Ex: cliente.nome vai para nomeCliente)
     @Mapping(source = "cliente.nome", target = "nomeCliente")
     @Mapping(source = "barbeiro.nome", target = "nomeBarbeiro")
     @Mapping(source = "servico.nome", target = "nomeServico")

@@ -3,12 +3,13 @@ package br.ifg.urt.barbearia_api.controller;
 import br.ifg.urt.barbearia_api.dto.request.ItemVendaRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.ItemVendaResponseDTO;
 import br.ifg.urt.barbearia_api.service.ItemVendaService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 @RestController
 @RequestMapping("/itens-venda")
-
 public class ItemVendaController {
 
     private final ItemVendaService itemVendaService;
@@ -28,17 +29,22 @@ public class ItemVendaController {
     }
 
     @GetMapping("/{id}")
-    public ItemVendaResponseDTO buscarPorId(@PathVariable Long id) {
-        return itemVendaService.buscarPorId(id);
+    public ResponseEntity<ItemVendaResponseDTO> buscarPorId(@PathVariable Long id) {
+        // Altere para findById(id) se o nome no seu Service for em inglês
+        ItemVendaResponseDTO dto = itemVendaService.buscarPorId(id);
+        return ResponseEntity.ok(dto);
     }
 
     @PutMapping("/{id}")
-    public ItemVendaResponseDTO atualizar(@PathVariable Long id, @RequestBody ItemVendaRequestDTO dto) {
-        return itemVendaService.atualizar(id, dto);
+    public ResponseEntity<ItemVendaResponseDTO> atualizar(@PathVariable Long id, @RequestBody ItemVendaRequestDTO dto) {
+        // Altere para alterar(id, dto) ou update(id, dto) se o nome no Service for diferente
+        ItemVendaResponseDTO atualizado = itemVendaService.atualizar(id, dto);
+        return ResponseEntity.ok(atualizado);
     }
 
     @DeleteMapping("/{id}")
-    public void deletar(@PathVariable Long id) {
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
         itemVendaService.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 }

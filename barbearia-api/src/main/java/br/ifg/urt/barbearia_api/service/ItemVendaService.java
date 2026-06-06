@@ -17,7 +17,7 @@ public class ItemVendaService {
 
     private final ItemVendaRepository itemVendaRepository;
     private final ItemRepository itemRepository;
-    private final ItemVendaMapper itemVendaMapper; // Injetando o novo Mapper
+    private final ItemVendaMapper itemVendaMapper;
 
     public ItemVendaService(
             ItemVendaRepository itemVendaRepository,
@@ -35,18 +35,14 @@ public class ItemVendaService {
 
         ItemVenda itemVenda = itemVendaMapper.toEntity(dto);
         itemVenda.setItem(item);
-
-        // Se item.getValor() retornar um Value Object no seu projeto real,
-        // mude para buscar a propriedade interna (ex: item.getValor().getValor())
         itemVenda.setValorUnitario(item.getValor());
 
-        // Tratamento da regra de negócio de subtotal mantida no Service:
         BigDecimal valorOriginal = (item.getValor() instanceof BigDecimal)
                 ? (BigDecimal) item.getValor()
-                : BigDecimal.ZERO; // Ajuste dinâmico baseado no tipo do seu modelo
+                : BigDecimal.ZERO;
 
         BigDecimal subtotal = valorOriginal.multiply(BigDecimal.valueOf(dto.quantidade()));
-        // itemVenda.setSubtotal(subtotal); // Atribui conforme o tipo do objeto no seu projeto
+        // itemVenda.setSubtotal(subtotal); // Atribua se o setSubtotal existir na sua entidade
 
         ItemVenda salvo = itemVendaRepository.save(itemVenda);
         return itemVendaMapper.toResponseDTO(salvo);
@@ -54,6 +50,37 @@ public class ItemVendaService {
 
     public List<ItemVendaResponseDTO> listar() {
         return itemVendaMapper.toResponseDTOList(itemVendaRepository.findAll());
+    }
+
+
+    public ItemVendaResponseDTO buscarPorId(Long id) {
+        ItemVenda itemVenda = itemVendaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("ItemVenda não encontrado"));
+        return itemVendaMapper.toResponseDTO(itemVenda);
+    }
+
+
+    public ItemVendaResponseDTO atualizar(Long id, ItemVendaRequestDTO dto) {
+        ItemVenda itemVendaExistente = itemVendaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("ItemVenda não encontrado"));
+
+        Item item = itemRepository.findById(dto.idItem())
+                .orElseThrow(() -> new RuntimeException("Item não encontrado"));
+
+        // Atualiza os dados do item de venda com as novas informações do DTO
+        itemVendaExistente.setItem(item);
+        itemVendaExistente.setQuantidade(dto.quantidade());
+        itemVendaExistente.setValorUnitario(item.getValor());
+
+        BigDecimal valorOriginal = (item.getValor() instanceof BigDecimal)
+                ? (BigDecimal) item.getValor()
+                : BigDecimal.ZERO;
+
+        BigDecimal subtotal = valorOriginal.multiply(BigDecimal.valueOf(dto.quantidade()));
+        // itemVendaExistente.setSubtotal(subtotal); // Atribua se o setSubtotal existir na sua entidade
+
+        ItemVenda atualizado = itemVendaRepository.save(itemVendaExistente);
+        return itemVendaMapper.toResponseDTO(atualizado);
     }
 
     public void deletar(Long id) {

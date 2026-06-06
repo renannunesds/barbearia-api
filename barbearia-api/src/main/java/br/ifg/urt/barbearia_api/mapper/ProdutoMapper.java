@@ -10,13 +10,13 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ProdutoMapper {
 
-    @Mapping(target = "valor", source = "valor.valor")
-    @Mapping(target = "valorFormatado", expression = "java(produto.getValor() != null ? produto.getValor().getFormatado() : null)")
+    // Como Produto e ProdutoResponseDTO compartilham os mesmos nomes de atributos (ex: nome, valor),
+    // o MapStruct mapeia tudo automaticamente.
     ProdutoResponseDTO toResponseDTO(Produto produto);
 
     List<ProdutoResponseDTO> toResponseDTOList(List<Produto> produtos);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "valor", expression = "java(new br.ifg.urt.barbearia_api.model.vo.PrecoVO(dto.valor()))")
+    // Corrigido para ignorar o nome real da propriedade: idItem
+    @Mapping(target = "idItem", ignore = true)
     Produto toEntity(ProdutoRequestDTO dto);
 }
