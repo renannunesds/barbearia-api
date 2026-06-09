@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-06T12:56:33-0300",
+    date = "2026-06-08T23:38:21-0300",
     comments = "version: 1.6.3, compiler: javac, environment: Java 21.0.11 (Microsoft)"
 )
 @Component
@@ -28,17 +28,17 @@ public class BarbeiroMapperImpl implements BarbeiroMapper {
         String telefone = null;
         Long id = null;
         String nome = null;
-        String especialidade = null;
         Boolean ativo = null;
 
         email = barbeiroEmailEndereco( barbeiro );
         telefone = barbeiroTelefoneNumero( barbeiro );
         id = barbeiro.getId();
         nome = barbeiro.getNome();
-        especialidade = barbeiro.getEspecialidade();
         ativo = barbeiro.getAtivo();
 
-        BarbeiroResponseDTO barbeiroResponseDTO = new BarbeiroResponseDTO( id, nome, email, telefone, especialidade, ativo );
+        List<String> especialidades = barbeiro.getEspecialidades() != null ? barbeiro.getEspecialidades().stream().map(br.ifg.urt.barbearia_api.model.Especialidade::getNome).collect(java.util.stream.Collectors.toList()) : null;
+
+        BarbeiroResponseDTO barbeiroResponseDTO = new BarbeiroResponseDTO( id, nome, email, telefone, especialidades, ativo );
 
         return barbeiroResponseDTO;
     }
@@ -66,7 +66,6 @@ public class BarbeiroMapperImpl implements BarbeiroMapper {
         Barbeiro barbeiro = new Barbeiro();
 
         barbeiro.setNome( dto.nome() );
-        barbeiro.setEspecialidade( dto.especialidade() );
         barbeiro.setAtivo( dto.ativo() );
 
         barbeiro.setEmail( new br.ifg.urt.barbearia_api.model.vo.EmailVO(dto.email()) );

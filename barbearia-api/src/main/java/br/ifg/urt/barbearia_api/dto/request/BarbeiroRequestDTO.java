@@ -2,7 +2,9 @@ package br.ifg.urt.barbearia_api.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 
 public record BarbeiroRequestDTO(
 
@@ -21,8 +23,8 @@ public record BarbeiroRequestDTO(
         @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres")
         String senha,
 
-        @NotBlank(message = "A especialidade é obrigatória")
-        String especialidade,
+        @NotEmpty(message = "A lista de especialidades é obrigatória")
+        List<Long> especialidades,
 
         Boolean ativo
 

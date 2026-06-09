@@ -4,9 +4,9 @@ import br.ifg.urt.barbearia_api.model.vo.EmailVO;
 import br.ifg.urt.barbearia_api.model.vo.TelefoneVO;
 import br.ifg.urt.barbearia_api.model.vo.SenhaVO;
 import java.io.Serializable;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "barbeiros")
@@ -14,30 +14,25 @@ public class Barbeiro extends Usuario implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Column(nullable = false, length = 100)
-    private String especialidade;
-
     @Column(nullable = false)
     private Boolean ativo;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "barbeiro_especialidade",
+            joinColumns = @JoinColumn(name = "id_barbeiro"),
+            inverseJoinColumns = @JoinColumn(name = "id_especialidade")
+    )
+    private List<Especialidade> especialidades = new ArrayList<>();
 
     public Barbeiro() {
     }
 
     public Barbeiro(Long id, String nome, EmailVO email, TelefoneVO telefone, SenhaVO senha,
-                    String especialidade, Boolean ativo) {
-
+                    List<Especialidade> especialidades, Boolean ativo) {
         super(id, nome, email, telefone, senha);
-
-        this.especialidade = especialidade;
+        this.especialidades = especialidades;
         this.ativo = ativo;
-    }
-
-    public String getEspecialidade() {
-        return especialidade;
-    }
-
-    public void setEspecialidade(String especialidade) {
-        this.especialidade = especialidade;
     }
 
     public Boolean getAtivo() {
@@ -46,6 +41,14 @@ public class Barbeiro extends Usuario implements Serializable {
 
     public void setAtivo(Boolean ativo) {
         this.ativo = ativo;
+    }
+
+    public List<Especialidade> getEspecialidades() {
+        return especialidades;
+    }
+
+    public void setEspecialidades(List<Especialidade> especialidades) {
+        this.especialidades = especialidades;
     }
 
     public void activarBarbeiro() {
