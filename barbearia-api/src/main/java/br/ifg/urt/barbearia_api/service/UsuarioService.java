@@ -8,8 +8,10 @@ import br.ifg.urt.barbearia_api.model.vo.EmailVO;
 import br.ifg.urt.barbearia_api.model.vo.TelefoneVO;
 import br.ifg.urt.barbearia_api.model.vo.SenhaVO;
 import br.ifg.urt.barbearia_api.repository.UsuarioRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UsuarioService {
@@ -22,9 +24,10 @@ public class UsuarioService {
         this.mapper = mapper;
     }
 
-    public List<UsuarioResponseDTO> findAll() {
-        List<Usuario> usuarios = repository.findAll();
-        return mapper.toResponseDTOList(usuarios);
+    // ATUALIZADO: Listagem global paginada
+    public Page<UsuarioResponseDTO> findAll(Pageable pageable) {
+        Page<Usuario> usuariosPage = repository.findAll(pageable);
+        return usuariosPage.map(mapper::toResponseDTO);
     }
 
     public UsuarioResponseDTO findById(Long id) {
@@ -33,12 +36,14 @@ public class UsuarioService {
         return mapper.toResponseDTO(usuario);
     }
 
+    @Transactional
     public UsuarioResponseDTO create(UsuarioRequestDTO dto) {
         Usuario usuario = mapper.toEntity(dto);
         Usuario usuarioSalvo = repository.save(usuario);
         return mapper.toResponseDTO(usuarioSalvo);
     }
 
+    @Transactional
     public UsuarioResponseDTO update(Long id, UsuarioRequestDTO dto) {
         Usuario usuarioExistente = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
@@ -52,6 +57,7 @@ public class UsuarioService {
         return mapper.toResponseDTO(updated);
     }
 
+    @Transactional
     public void delete(Long id) {
         Usuario usuario = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));

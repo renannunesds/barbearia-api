@@ -10,6 +10,8 @@ import br.ifg.urt.barbearia_api.model.vo.TelefoneVO;
 import br.ifg.urt.barbearia_api.model.vo.SenhaVO;
 import br.ifg.urt.barbearia_api.repository.BarbeiroRepository;
 import br.ifg.urt.barbearia_api.repository.EspecialidadeRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
@@ -28,9 +30,17 @@ public class BarbeiroService {
         this.mapper = mapper;
     }
 
-    public List<BarbeiroResponseDTO> findAll() {
-        List<Barbeiro> barbeiros = repository.findAll();
-        return mapper.toResponseDTOList(barbeiros);
+    // ATUALIZADO: Filtra por nome se for enviado, senão traz todos paginados
+    public Page<BarbeiroResponseDTO> findAll(String nome, Pageable pageable) {
+        Page<Barbeiro> barbeirosPage;
+
+        if (nome != null && !nome.isBlank()) {
+            barbeirosPage = repository.findByNomeContainingIgnoreCase(nome, pageable);
+        } else {
+            barbeirosPage = repository.findAll(pageable);
+        }
+
+        return barbeirosPage.map(mapper::toResponseDTO);
     }
 
     public BarbeiroResponseDTO findById(Long id) {

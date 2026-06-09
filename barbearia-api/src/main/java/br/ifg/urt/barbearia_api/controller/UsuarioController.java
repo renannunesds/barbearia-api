@@ -4,19 +4,19 @@ import br.ifg.urt.barbearia_api.dto.request.UsuarioRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.UsuarioResponseDTO;
 import br.ifg.urt.barbearia_api.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -30,19 +30,20 @@ public class UsuarioController {
         this.service = service;
     }
 
-    // Buscar todos
+    // Buscar todos (PAGINADO)
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
-            summary = "Listar todos os usuários",
-            description = "Retorna uma listagem completa dos perfis de usuários que possuem credenciais no sistema.",
+            summary = "Listar usuários paginados",
+            description = "Retorna uma listagem paginada dos perfis de usuários que possuem credenciais no sistema.",
             responses = {
                     @ApiResponse(description = "Sucesso", responseCode = "200",
-                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = UsuarioResponseDTO.class)))),
+                            content = @Content(schema = @Schema(implementation = Page.class))),
                     @ApiResponse(description = "Erro Interno", responseCode = "500", content = @Content)
             }
     )
-    public ResponseEntity<List<UsuarioResponseDTO>> buscarTodos() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<Page<UsuarioResponseDTO>> buscarTodos(
+            @PageableDefault(size = 10, sort = "username") Pageable pageable) {
+        return ResponseEntity.ok(service.findAll(pageable));
     }
 
     // Buscar por ID

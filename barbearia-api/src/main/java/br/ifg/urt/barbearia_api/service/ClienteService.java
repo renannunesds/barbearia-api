@@ -8,9 +8,10 @@ import br.ifg.urt.barbearia_api.model.vo.EmailVO;
 import br.ifg.urt.barbearia_api.model.vo.TelefoneVO;
 import br.ifg.urt.barbearia_api.model.vo.SenhaVO;
 import br.ifg.urt.barbearia_api.repository.ClienteRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
 
 @Service
 public class ClienteService {
@@ -23,9 +24,17 @@ public class ClienteService {
         this.mapper = mapper;
     }
 
-    public List<ClienteResponseDTO> findAll() {
-        List<Cliente> clientes = repository.findAll();
-        return mapper.toResponseDTOList(clientes);
+    // ATUALIZADO: Lógica de decisão de filtro por nome + paginação
+    public Page<ClienteResponseDTO> findAll(String nome, Pageable pageable) {
+        Page<Cliente> clientesPage;
+
+        if (nome != null && !nome.isBlank()) {
+            clientesPage = repository.findByNomeContainingIgnoreCase(nome, pageable);
+        } else {
+            clientesPage = repository.findAll(pageable);
+        }
+
+        return clientesPage.map(mapper::toResponseDTO);
     }
 
     public ClienteResponseDTO findById(Long id) {

@@ -4,19 +4,19 @@ import br.ifg.urt.barbearia_api.dto.request.ClienteRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.ClienteResponseDTO;
 import br.ifg.urt.barbearia_api.service.ClienteService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/clientes")
@@ -30,22 +30,23 @@ public class ClienteController {
         this.service = service;
     }
 
-    // Buscar todos
+    // ATUALIZADO COM FILTRO E PAGINAÇÃO
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
-            summary = "Listar todos os clientes",
-            description = "Retorna uma lista com todos os clientes cadastrados na base de dados.",
+            summary = "Listar clientes com paginação e filtro",
+            description = "Retorna uma página de clientes. Permite filtrar por nome e utilizar paginação.",
             responses = {
                     @ApiResponse(description = "Sucesso", responseCode = "200",
-                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = ClienteResponseDTO.class)))),
+                            content = @Content(schema = @Schema(implementation = Page.class))),
                     @ApiResponse(description = "Erro Interno", responseCode = "500", content = @Content)
             }
     )
-    public ResponseEntity<List<ClienteResponseDTO>> buscarTodos() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<Page<ClienteResponseDTO>> buscarTodos(
+            @RequestParam(required = false) String nome,
+            @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
+        return ResponseEntity.ok(service.findAll(nome, pageable));
     }
 
-    // Buscar por ID
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Buscar cliente por ID",
@@ -60,7 +61,6 @@ public class ClienteController {
         return ResponseEntity.ok(service.findById(id));
     }
 
-    // Criar cliente
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Criar novo cliente",
@@ -78,7 +78,6 @@ public class ClienteController {
                 .body(novoCliente);
     }
 
-    // Atualizar cliente
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Atualizar cliente",
@@ -96,7 +95,6 @@ public class ClienteController {
         return ResponseEntity.ok(service.update(id, dto));
     }
 
-    // Deletar cliente
     @DeleteMapping("/{id}")
     @Operation(
             summary = "Excluir cliente",

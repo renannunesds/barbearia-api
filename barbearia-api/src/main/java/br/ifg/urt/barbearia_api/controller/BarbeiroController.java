@@ -4,19 +4,19 @@ import br.ifg.urt.barbearia_api.dto.request.BarbeiroRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.BarbeiroResponseDTO;
 import br.ifg.urt.barbearia_api.service.BarbeiroService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/barbeiros")
@@ -30,22 +30,23 @@ public class BarbeiroController {
         this.service = service;
     }
 
-    // Buscar todos os barbeiros
+    // ATUALIZADO COM FILTRO E PAGINAÇÃO
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
-            summary = "Listar todos os barbeiros",
-            description = "Retorna uma lista com todos os barbeiros cadastrados e as suas respectivas especialidades.",
+            summary = "Listar barbeiros paginados",
+            description = "Retorna uma página de barbeiros com suas respectivas especialidades. Permite filtrar por nome.",
             responses = {
                     @ApiResponse(description = "Sucesso", responseCode = "200",
-                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = BarbeiroResponseDTO.class)))),
+                            content = @Content(schema = @Schema(implementation = Page.class))),
                     @ApiResponse(description = "Erro Interno", responseCode = "500", content = @Content)
             }
     )
-    public ResponseEntity<List<BarbeiroResponseDTO>> buscarTodos() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<Page<BarbeiroResponseDTO>> buscarTodos(
+            @RequestParam(required = false) String nome,
+            @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
+        return ResponseEntity.ok(service.findAll(nome, pageable));
     }
 
-    // Buscar barbeiro por ID
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Buscar barbeiro por ID",
@@ -60,7 +61,6 @@ public class BarbeiroController {
         return ResponseEntity.ok(service.findById(id));
     }
 
-    // Criar um novo barbeiro
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Criar novo barbeiro",
@@ -78,7 +78,6 @@ public class BarbeiroController {
                 .body(novoBarbeiro);
     }
 
-    // Atualizar os dados de um barbeiro
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Atualizar barbeiro",
@@ -96,7 +95,6 @@ public class BarbeiroController {
         return ResponseEntity.ok(service.update(id, dto));
     }
 
-    // Ativar o status de um barbeiro
     @PatchMapping("/{id}/ativar")
     @Operation(
             summary = "Ativar barbeiro",
@@ -111,7 +109,6 @@ public class BarbeiroController {
         return ResponseEntity.noContent().build();
     }
 
-    // Desativar o status de um barbeiro
     @PatchMapping("/{id}/desativar")
     @Operation(
             summary = "Desativar barbeiro",
@@ -126,7 +123,6 @@ public class BarbeiroController {
         return ResponseEntity.noContent().build();
     }
 
-    // Deletar logicamente ou fisicamente um barbeiro do sistema
     @DeleteMapping("/{id}")
     @Operation(
             summary = "Excluir barbeiro",
