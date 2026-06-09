@@ -1,5 +1,6 @@
 package br.ifg.urt.barbearia_api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -18,8 +19,9 @@ public class Especialidade implements Serializable {
     @Column(nullable = false, unique = true)
     private String nome;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "especialidades")
-    private List<Barbeiro> barbeiros = new ArrayList<>();
+    private List<Barbeiro> barbeiros;
 
     public Especialidade() {
     }
