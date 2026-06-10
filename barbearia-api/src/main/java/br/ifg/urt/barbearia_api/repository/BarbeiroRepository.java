@@ -3,6 +3,7 @@ package br.ifg.urt.barbearia_api.repository;
 import br.ifg.urt.barbearia_api.model.Barbeiro;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,8 +21,14 @@ public interface BarbeiroRepository extends JpaRepository<Barbeiro, Long> {
 
     Optional<Barbeiro> findByEmailEndereco(String email);
 
-    // ATUALIZADO: Agora retorna Page e aceita Pageable
+    // CORRIGIDO: O EntityGraph força o carregamento imediato das especialidades junto com a paginação
+    @EntityGraph(attributePaths = "especialidades")
     Page<Barbeiro> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
+
+    // ADICIONADO: Sobrescreve o findAll padrão para também carregar as especialidades em lote e evitar o Lazy no cache
+    @Override
+    @EntityGraph(attributePaths = "especialidades")
+    Page<Barbeiro> findAll(Pageable pageable);
 
     List<Barbeiro> findByAtivoTrue();
 

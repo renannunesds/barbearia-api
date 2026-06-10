@@ -9,6 +9,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -30,7 +33,6 @@ public class UsuarioController {
         this.service = service;
     }
 
-    // Buscar todos (PAGINADO)
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Listar usuários paginados",
@@ -41,12 +43,14 @@ public class UsuarioController {
                     @ApiResponse(description = "Erro Interno", responseCode = "500", content = @Content)
             }
     )
+    @Cacheable(value = "usuariosCache", key = "{#pageable.pageNumber, #pageable.pageSize}")
     public ResponseEntity<Page<UsuarioResponseDTO>> buscarTodos(
-            @PageableDefault(size = 10, sort = "username") Pageable pageable) {
+            @ParameterObject @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
+
+        System.out.println("### CONSULTANDO USUÁRIOS NO BANCO DE DADOS... ###");
         return ResponseEntity.ok(service.findAll(pageable));
     }
 
-    // Buscar por ID
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Buscar usuário por ID",
@@ -61,7 +65,6 @@ public class UsuarioController {
         return ResponseEntity.ok(service.findById(id));
     }
 
-    // Criar usuário
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Criar novo usuário",
@@ -72,6 +75,7 @@ public class UsuarioController {
                     @ApiResponse(description = "Erro de validação ou payload incorreto", responseCode = "400", content = @Content)
             }
     )
+    @CacheEvict(value = "usuariosCache", allEntries = true)
     public ResponseEntity<UsuarioResponseDTO> criar(@Valid @RequestBody UsuarioRequestDTO dto) {
         UsuarioResponseDTO novoUsuario = service.create(dto);
         return ResponseEntity
@@ -79,7 +83,6 @@ public class UsuarioController {
                 .body(novoUsuario);
     }
 
-    // Atualizar usuário
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Atualizar usuário",
@@ -91,13 +94,13 @@ public class UsuarioController {
                     @ApiResponse(description = "Dados inválidos", responseCode = "400", content = @Content)
             }
     )
+    @CacheEvict(value = "usuariosCache", allEntries = true)
     public ResponseEntity<UsuarioResponseDTO> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody UsuarioRequestDTO dto) {
         return ResponseEntity.ok(service.update(id, dto));
     }
 
-    // Deletar usuário
     @DeleteMapping("/{id}")
     @Operation(
             summary = "Excluir usuário",
@@ -107,6 +110,7 @@ public class UsuarioController {
                     @ApiResponse(description = "Usuário não encontrado", responseCode = "404", content = @Content)
             }
     )
+    @CacheEvict(value = "usuariosCache", allEntries = true)
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();

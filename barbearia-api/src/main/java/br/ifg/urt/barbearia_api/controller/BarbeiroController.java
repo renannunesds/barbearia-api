@@ -9,6 +9,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -30,7 +33,6 @@ public class BarbeiroController {
         this.service = service;
     }
 
-    // ATUALIZADO COM FILTRO E PAGINAÇÃO
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Listar barbeiros paginados",
@@ -41,9 +43,12 @@ public class BarbeiroController {
                     @ApiResponse(description = "Erro Interno", responseCode = "500", content = @Content)
             }
     )
+    @Cacheable(value = "barbeirosCache", key = "{#nome, #pageable.pageNumber, #pageable.pageSize}")
     public ResponseEntity<Page<BarbeiroResponseDTO>> buscarTodos(
             @RequestParam(required = false) String nome,
-            @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
+            @ParameterObject @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
+
+        System.out.println("### CONSULTANDO BARBEIROS NO BANCO DE DADOS... ###");
         return ResponseEntity.ok(service.findAll(nome, pageable));
     }
 
@@ -71,6 +76,7 @@ public class BarbeiroController {
                     @ApiResponse(description = "Erro de validação nos dados", responseCode = "400", content = @Content)
             }
     )
+    @CacheEvict(value = "barbeirosCache", allEntries = true)
     public ResponseEntity<BarbeiroResponseDTO> criar(@Valid @RequestBody BarbeiroRequestDTO dto) {
         BarbeiroResponseDTO novoBarbeiro = service.create(dto);
         return ResponseEntity
@@ -89,6 +95,7 @@ public class BarbeiroController {
                     @ApiResponse(description = "Dados inválidos", responseCode = "400", content = @Content)
             }
     )
+    @CacheEvict(value = "barbeirosCache", allEntries = true)
     public ResponseEntity<BarbeiroResponseDTO> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody BarbeiroRequestDTO dto) {
@@ -104,6 +111,7 @@ public class BarbeiroController {
                     @ApiResponse(description = "Barbeiro não encontrado", responseCode = "404", content = @Content)
             }
     )
+    @CacheEvict(value = "barbeirosCache", allEntries = true)
     public ResponseEntity<Void> activarBarbeiro(@PathVariable Long id) {
         service.ativarBarbeiro(id);
         return ResponseEntity.noContent().build();
@@ -118,6 +126,7 @@ public class BarbeiroController {
                     @ApiResponse(description = "Barbeiro não encontrado", responseCode = "404", content = @Content)
             }
     )
+    @CacheEvict(value = "barbeirosCache", allEntries = true)
     public ResponseEntity<Void> desativarBarbeiro(@PathVariable Long id) {
         service.desativarBarbeiro(id);
         return ResponseEntity.noContent().build();
@@ -132,6 +141,7 @@ public class BarbeiroController {
                     @ApiResponse(description = "Barbeiro não encontrado", responseCode = "404", content = @Content)
             }
     )
+    @CacheEvict(value = "barbeirosCache", allEntries = true)
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();

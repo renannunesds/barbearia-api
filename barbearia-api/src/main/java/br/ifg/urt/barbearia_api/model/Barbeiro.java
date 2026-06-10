@@ -3,6 +3,7 @@ package br.ifg.urt.barbearia_api.model;
 import br.ifg.urt.barbearia_api.model.vo.EmailVO;
 import br.ifg.urt.barbearia_api.model.vo.TelefoneVO;
 import br.ifg.urt.barbearia_api.model.vo.SenhaVO;
+import org.hibernate.annotations.BatchSize;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ public class Barbeiro extends Usuario implements Serializable {
             joinColumns = @JoinColumn(name = "id_barbeiro"),
             inverseJoinColumns = @JoinColumn(name = "id_especialidade")
     )
+    @BatchSize(size = 10) // CORRIGIDO: Carrega as especialidades em lotes para evitar o aviso de paginação em memória
     private List<Especialidade> especialidades = new ArrayList<>();
 
     public Barbeiro() {

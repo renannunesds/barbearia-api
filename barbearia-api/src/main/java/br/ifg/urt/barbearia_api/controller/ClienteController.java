@@ -9,6 +9,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -30,7 +33,6 @@ public class ClienteController {
         this.service = service;
     }
 
-    // ATUALIZADO COM FILTRO E PAGINAÇÃO
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Listar clientes com paginação e filtro",
@@ -41,9 +43,12 @@ public class ClienteController {
                     @ApiResponse(description = "Erro Interno", responseCode = "500", content = @Content)
             }
     )
+    @Cacheable(value = "clientesCache", key = "{#nome, #pageable.pageNumber, #pageable.pageSize}")
     public ResponseEntity<Page<ClienteResponseDTO>> buscarTodos(
             @RequestParam(required = false) String nome,
-            @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
+            @ParameterObject @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
+
+        System.out.println("### CONSULTANDO CLIENTES NO BANCO DE DADOS... ###");
         return ResponseEntity.ok(service.findAll(nome, pageable));
     }
 
@@ -71,6 +76,7 @@ public class ClienteController {
                     @ApiResponse(description = "Dados inválidos enviados", responseCode = "400", content = @Content)
             }
     )
+    @CacheEvict(value = "clientesCache", allEntries = true)
     public ResponseEntity<ClienteResponseDTO> criar(@Valid @RequestBody ClienteRequestDTO dto) {
         ClienteResponseDTO novoCliente = service.create(dto);
         return ResponseEntity
@@ -89,6 +95,7 @@ public class ClienteController {
                     @ApiResponse(description = "Dados inválidos", responseCode = "400", content = @Content)
             }
     )
+    @CacheEvict(value = "clientesCache", allEntries = true)
     public ResponseEntity<ClienteResponseDTO> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody ClienteRequestDTO dto) {
@@ -104,6 +111,7 @@ public class ClienteController {
                     @ApiResponse(description = "Cliente não encontrado", responseCode = "404", content = @Content)
             }
     )
+    @CacheEvict(value = "clientesCache", allEntries = true)
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
