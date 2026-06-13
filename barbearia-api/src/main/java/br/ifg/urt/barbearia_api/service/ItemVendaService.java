@@ -30,18 +30,19 @@ public class ItemVendaService {
 
     @Transactional
     public ItemVendaResponseDTO criar(ItemVendaRequestDTO dto) {
-        // ATUALIZADO: Usando findByIdOrThrow do ItemRepository
         Item item = itemRepository.findByIdOrThrow(dto.idItem());
 
         ItemVenda itemVenda = itemVendaMapper.toEntity(dto);
         itemVenda.setItem(item);
         itemVenda.setValorUnitario(item.getValor());
 
-        BigDecimal valorOriginal = (item.getValor() instanceof BigDecimal)
-                ? (BigDecimal) item.getValor()
-                : BigDecimal.ZERO;
-
+        // CORREÇÃO: Sem instanceof ou casting redundante.
+        // Se o valor for nulo, usamos o ZERO, senão usamos o próprio valor.
+        BigDecimal valorOriginal = (item.getValor() != null) ? item.getValor() : BigDecimal.ZERO;
         BigDecimal subtotal = valorOriginal.multiply(BigDecimal.valueOf(dto.quantidade()));
+
+        // CORREÇÃO: Setamos o subtotal no objeto para a variável não ficar sem uso
+        itemVenda.setSubtotal(subtotal);
 
         ItemVenda salvo = itemVendaRepository.save(itemVenda);
         return itemVendaMapper.toResponseDTO(salvo);
@@ -59,7 +60,6 @@ public class ItemVendaService {
 
     @Transactional
     public ItemVendaResponseDTO atualizar(Long id, ItemVendaRequestDTO dto) {
-        // ATUALIZADO: Usando os métodos padrão dos Repositories
         ItemVenda itemVendaExistente = itemVendaRepository.findByIdOrThrow(id);
         Item item = itemRepository.findByIdOrThrow(dto.idItem());
 
@@ -67,11 +67,12 @@ public class ItemVendaService {
         itemVendaExistente.setQuantidade(dto.quantidade());
         itemVendaExistente.setValorUnitario(item.getValor());
 
-        BigDecimal valorOriginal = (item.getValor() instanceof BigDecimal)
-                ? (BigDecimal) item.getValor()
-                : BigDecimal.ZERO;
-
+        // CORREÇÃO: Limpeza do casting e instanceof redundante
+        BigDecimal valorOriginal = (item.getValor() != null) ? item.getValor() : BigDecimal.ZERO;
         BigDecimal subtotal = valorOriginal.multiply(BigDecimal.valueOf(dto.quantidade()));
+
+        // CORREÇÃO: Setamos o subtotal no objeto existente
+        itemVendaExistente.setSubtotal(subtotal);
 
         ItemVenda atualizado = itemVendaRepository.save(itemVendaExistente);
         return itemVendaMapper.toResponseDTO(atualizado);
