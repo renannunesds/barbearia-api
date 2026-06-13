@@ -1,5 +1,6 @@
 package br.ifg.urt.barbearia_api.controller;
 
+import br.ifg.urt.barbearia_api.assembler.ClienteModelAssembler;
 import br.ifg.urt.barbearia_api.dto.request.ClienteRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.ClienteResponseDTO;
 import br.ifg.urt.barbearia_api.service.ClienteService;
@@ -15,6 +16,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,28 +32,37 @@ import org.springframework.web.bind.annotation.*;
 public class ClienteController {
 
     private final ClienteService service;
+    private final ClienteModelAssembler assembler; // 1. Injetando seu assembler customizado
 
-    public ClienteController(ClienteService service) {
+    // Atualizado o construtor para receber o seu assembler
+    public ClienteController(ClienteService service, ClienteModelAssembler assembler) {
         this.service = service;
+        this.assembler = assembler;
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Listar clientes com paginação e filtro",
-            description = "Retorna uma página de clientes. Permite filtrar por nome e utilizar paginação.",
+            description = "Retorna uma página de clientes com seus respectivos links HATEOAS de navegação.",
             responses = {
                     @ApiResponse(description = "Sucesso", responseCode = "200",
-                            content = @Content(schema = @Schema(implementation = Page.class))),
+                            content = @Content(schema = @Schema(implementation = PagedModel.class))),
                     @ApiResponse(description = "Erro Interno", responseCode = "500", content = @Content)
             }
     )
     @Cacheable(value = "clientesCache", key = "{#nome, #pageable.pageNumber, #pageable.pageSize}")
-    public ResponseEntity<Page<ClienteResponseDTO>> buscarTodos(
+    public ResponseEntity<PagedModel<EntityModel<ClienteResponseDTO>>> buscarTodos(
             @RequestParam(required = false) String nome,
-            @ParameterObject @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
+            @ParameterObject @PageableDefault(size = 10, sort = "nome") Pageable pageable,
+            PagedResourcesAssembler<ClienteResponseDTO> pagedResourcesAssembler) { // 2. Recebe o assembler nativo para listas paginadas
 
         System.out.println("### CONSULTANDO CLIENTES NO BANCO DE DADOS... ###");
-        return ResponseEntity.ok(service.findAll(nome, pageable));
+        Page<ClienteResponseDTO> clientesPage = service.findAll(nome, pageable);
+
+        // 3. Converte a página em um PagedModel preenchido com hiperlinks de paginação
+        PagedModel<EntityModel<ClienteResponseDTO>> pagedModel = pagedResourcesAssembler.toModel(clientesPage, assembler);
+
+        return ResponseEntity.ok(pagedModel);
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -62,8 +75,10 @@ public class ClienteController {
                     @ApiResponse(description = "Cliente não encontrado", responseCode = "404", content = @Content)
             }
     )
-    public ResponseEntity<ClienteResponseDTO> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<EntityModel<ClienteResponseDTO>> buscarPorId(@PathVariable Long id) {
+        ClienteResponseDTO dto = service.findById(id);
+        // Envelopa o DTO com o link "self" e o link de listagem
+        return ResponseEntity.ok(assembler.toModel(dto));
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -77,11 +92,11 @@ public class ClienteController {
             }
     )
     @CacheEvict(value = "clientesCache", allEntries = true)
-    public ResponseEntity<ClienteResponseDTO> criar(@Valid @RequestBody ClienteRequestDTO dto) {
+    public ResponseEntity<EntityModel<ClienteResponseDTO>> criar(@Valid @RequestBody ClienteRequestDTO dto) {
         ClienteResponseDTO novoCliente = service.create(dto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(novoCliente);
+                .body(assembler.toModel(novoCliente));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -96,10 +111,11 @@ public class ClienteController {
             }
     )
     @CacheEvict(value = "clientesCache", allEntries = true)
-    public ResponseEntity<ClienteResponseDTO> atualizar(
+    public ResponseEntity<EntityModel<ClienteResponseDTO>> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody ClienteRequestDTO dto) {
-        return ResponseEntity.ok(service.update(id, dto));
+        ClienteResponseDTO clienteAtualizado = service.update(id, dto);
+        return ResponseEntity.ok(assembler.toModel(clienteAtualizado));
     }
 
     @DeleteMapping("/{id}")

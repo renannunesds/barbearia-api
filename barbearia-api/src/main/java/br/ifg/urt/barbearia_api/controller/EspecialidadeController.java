@@ -1,5 +1,6 @@
 package br.ifg.urt.barbearia_api.controller;
 
+import br.ifg.urt.barbearia_api.assembler.EspecialidadeModelAssembler;
 import br.ifg.urt.barbearia_api.exception.ResourceNotFoundException;
 import br.ifg.urt.barbearia_api.model.Especialidade;
 import br.ifg.urt.barbearia_api.repository.EspecialidadeRepository;
@@ -15,6 +16,9 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +30,12 @@ import org.springframework.web.bind.annotation.*;
 public class EspecialidadeController {
 
     private final EspecialidadeRepository repository;
+    private final EspecialidadeModelAssembler assembler; // 1. Injeção do seu assembler customizado
 
-    public EspecialidadeController(EspecialidadeRepository repository) {
+    // Construtor atualizado recebendo o assembler
+    public EspecialidadeController(EspecialidadeRepository repository, EspecialidadeModelAssembler assembler) {
         this.repository = repository;
+        this.assembler = assembler;
     }
 
     // 1. SALVAR - LIMPA O CACHE DA LISTAGEM (Slide 27)
@@ -43,18 +50,18 @@ public class EspecialidadeController {
                     @ApiResponse(description = "Erro na requisição", responseCode = "400", content = @Content)
             }
     )
-    public ResponseEntity<Especialidade> create(@RequestBody Especialidade especialidade) {
+    public ResponseEntity<EntityModel<Especialidade>> create(@RequestBody Especialidade especialidade) {
         Especialidade salva = repository.save(especialidade);
-        return ResponseEntity.status(HttpStatus.CREATED).body(salva);
+        // Retorna envelopado com os hiperlinks HATEOAS
+        return ResponseEntity.status(HttpStatus.CREATED).body(assembler.toModel(salva));
     }
 
     // 2. LISTAR PAGINADO - SALVA EM CACHE (Slide 22)
-    // A chave do cache muda se o usuário buscar por um nome específico ou mudar a página
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Cacheable(value = "especialidadesCache", key = "(#nome == null ? '' : #nome) + '-' + #pageable.pageNumber + '-' + #pageable.pageSize")
     @Operation(
             summary = "Listar especialidades paginadas",
-            description = "Retorna uma página contendo os registros de especialidades salvas no banco. Permite filtrar por nome.",
+            description = "Retorna uma página contendo os registros de especialidades salvas no banco com links HATEOAS.",
             parameters = {
                     @Parameter(name = "nome", description = "Filtrar por parte do nome da especialidade", required = false),
                     @Parameter(name = "page", description = "Número da página (começa em 0)", schema = @Schema(type = "integer", defaultValue = "0")),
@@ -63,13 +70,14 @@ public class EspecialidadeController {
             },
             responses = {
                     @ApiResponse(description = "Sucesso", responseCode = "200",
-                            content = @Content(schema = @Schema(implementation = Page.class))),
+                            content = @Content(schema = @Schema(implementation = PagedModel.class))),
                     @ApiResponse(description = "Erro Interno", responseCode = "500", content = @Content)
             }
     )
-    public ResponseEntity<Page<Especialidade>> findAll(
+    public ResponseEntity<PagedModel<EntityModel<Especialidade>>> findAll(
             @RequestParam(required = false) String nome,
-            @Parameter(hidden = true) @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
+            @Parameter(hidden = true) @PageableDefault(size = 10, sort = "nome") Pageable pageable,
+            PagedResourcesAssembler<Especialidade> pagedResourcesAssembler) { // 2. Recebe o gerenciador de paginação do HATEOAS
 
         System.out.println("### CONSULTANDO ESPECIALIDADES NO BANCO DE DADOS... ###");
         Page<Especialidade> resultado;
@@ -80,18 +88,21 @@ public class EspecialidadeController {
             resultado = repository.findAll(pageable);
         }
 
-        return ResponseEntity.ok(resultado);
+        // 3. Converte a página em um PagedModel preenchido com hiperlinks de paginação automáticos
+        PagedModel<EntityModel<Especialidade>> pagedModel = pagedResourcesAssembler.toModel(resultado, assembler);
+
+        return ResponseEntity.ok(pagedModel);
     }
 
     // 3. BUSCAR POR ID - SALVA EM CACHE INDIVIDUAL (Slide 17)
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Cacheable(value = "especialidadeIndividualCache", key = "#id")
-    @Operation(summary = "Buscar especialidade por ID", description = "Retorna os dados completos de uma única especialidade.")
-    public ResponseEntity<Especialidade> findById(@PathVariable Long id) {
+    @Operation(summary = "Buscar especialidade por ID", description = "Retorna os dados completos de uma única especialidade com links.")
+    public ResponseEntity<EntityModel<Especialidade>> findById(@PathVariable Long id) {
         System.out.println("### CONSULTANDO ID NO BANCO DE DADOS... ###");
         Especialidade especialidade = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Especialidade não encontrada com o ID: " + id));
-        return ResponseEntity.ok(especialidade);
+        return ResponseEntity.ok(assembler.toModel(especialidade));
     }
 
     // 4. ATUALIZAR - LIMPA AMBOS OS CACHES (Slide 33)
@@ -101,14 +112,16 @@ public class EspecialidadeController {
             @CacheEvict(value = "especialidadesCache", allEntries = true)
     })
     @Operation(summary = "Atualizar uma especialidade", description = "Modifica os dados de uma especialidade existente.")
-    public ResponseEntity<Especialidade> update(@PathVariable Long id, @RequestBody Especialidade dadosNovos) {
+    public ResponseEntity<EntityModel<Especialidade>> update(@PathVariable Long id, @RequestBody Especialidade dadosNovos) {
         Especialidade existente = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Especialidade não encontrada com o ID: " + id));
 
         existente.setNome(dadosNovos.getNome());
         existente.setPreco(dadosNovos.getPreco());
 
-        return ResponseEntity.ok(repository.save(existente));
+        Especialidade atualizada = repository.save(existente);
+
+        return ResponseEntity.ok(assembler.toModel(atualizada));
     }
 
     // 5. DELETAR - LIMPA AMBOS OS CACHES (Slide 37)
