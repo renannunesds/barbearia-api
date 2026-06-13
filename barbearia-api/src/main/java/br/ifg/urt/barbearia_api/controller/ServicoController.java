@@ -3,6 +3,8 @@ package br.ifg.urt.barbearia_api.controller;
 import br.ifg.urt.barbearia_api.dto.request.ServicoRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.ServicoResponseDTO;
 import br.ifg.urt.barbearia_api.service.ServicoService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,8 +25,11 @@ public class ServicoController {
     }
 
     @GetMapping
-    public List<ServicoResponseDTO> listar() {
-        return servicoService.listar();
+    public Page<ServicoResponseDTO> listar(
+            @RequestParam(required = false) String nome,
+            Pageable pageable
+    ) {
+        return servicoService.listar(nome, pageable);
     }
 
     @GetMapping("/{id}")
