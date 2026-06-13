@@ -3,8 +3,16 @@ package br.ifg.urt.barbearia_api.controller;
 import br.ifg.urt.barbearia_api.dto.request.AgendamentoRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.AgendamentoResponseDTO;
 import br.ifg.urt.barbearia_api.service.AgendamentoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -13,18 +21,27 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/agendamentos")
-@Validated // Alinhando com a validação do seu colega
+@Validated
+@Tag(name = "Agendamentos", description = "Endpoints para gerenciamento de agendamentos")
 public class AgendamentoController {
 
-    // 1. Mudança para 'final' e injeção por construtor (Melhor prática de mercado)
     private final AgendamentoService agendamentoService;
 
     public AgendamentoController(AgendamentoService agendamentoService) {
         this.agendamentoService = agendamentoService;
     }
 
-    // Criar agendamento
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+            summary = "Criar novo agendamento",
+            description = "Registra um novo agendamento no sistema vinculando cliente, barbeiro e serviço.",
+            responses = {
+                    @ApiResponse(description = "Criado com sucesso", responseCode = "201",
+                            content = @Content(schema = @Schema(implementation = AgendamentoResponseDTO.class))),
+                    @ApiResponse(description = "Erro de validação nos dados", responseCode = "400", content = @Content)
+            }
+    )
+    @CacheEvict(value = "agendamentosCache", allEntries = true)
     public ResponseEntity<AgendamentoResponseDTO> criar(
             @RequestBody @Valid AgendamentoRequestDTO dto) {
 
@@ -32,17 +49,33 @@ public class AgendamentoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // Listar todos
-    @GetMapping
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+            summary = "Listar todos os agendamentos",
+            description = "Retorna uma lista com todos os agendamentos cadastrados no sistema.",
+            responses = {
+                    @ApiResponse(description = "Sucesso", responseCode = "200",
+                            content = @Content(schema = @Schema(implementation = List.class))),
+                    @ApiResponse(description = "Erro Interno", responseCode = "500", content = @Content)
+            }
+    )
+    @Cacheable(value = "agendamentosCache")
     public ResponseEntity<List<AgendamentoResponseDTO>> listarTodos() {
 
         return ResponseEntity.ok(agendamentoService.listarTodos());
     }
 
-    // 2. NOVAS ROTAS: Deixando o seu CRUD completo igual ao do colega
-
     // Buscar agendamento por ID
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+            summary = "Buscar agendamento por ID",
+            description = "Retorna os detalhes de um agendamento específico passando o seu identificador único.",
+            responses = {
+                    @ApiResponse(description = "Sucesso", responseCode = "200",
+                            content = @Content(schema = @Schema(implementation = AgendamentoResponseDTO.class))),
+                    @ApiResponse(description = "Agendamento não encontrado", responseCode = "404", content = @Content)
+            }
+    )
     public ResponseEntity<AgendamentoResponseDTO> buscarPorId(
             @PathVariable Long id) {
 
@@ -50,7 +83,18 @@ public class AgendamentoController {
     }
 
     // Atualizar/Remarcar agendamento
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+            summary = "Atualizar agendamento",
+            description = "Atualiza por completo as informações de um agendamento existente por meio do ID.",
+            responses = {
+                    @ApiResponse(description = "Atualizado com sucesso", responseCode = "200",
+                            content = @Content(schema = @Schema(implementation = AgendamentoResponseDTO.class))),
+                    @ApiResponse(description = "Agendamento não encontrado", responseCode = "404", content = @Content),
+                    @ApiResponse(description = "Dados inválidos", responseCode = "400", content = @Content)
+            }
+    )
+    @CacheEvict(value = "agendamentosCache", allEntries = true)
     public ResponseEntity<AgendamentoResponseDTO> atualizar(
             @PathVariable Long id,
             @RequestBody @Valid AgendamentoRequestDTO dto) {
@@ -60,6 +104,15 @@ public class AgendamentoController {
 
     // Cancelar/Deletar agendamento
     @DeleteMapping("/{id}")
+    @Operation(
+            summary = "Excluir agendamento",
+            description = "Remove o registro do agendamento permanentemente da base de dados.",
+            responses = {
+                    @ApiResponse(description = "Excluído com sucesso", responseCode = "204"),
+                    @ApiResponse(description = "Agendamento não encontrado", responseCode = "404", content = @Content)
+            }
+    )
+    @CacheEvict(value = "agendamentosCache", allEntries = true)
     public ResponseEntity<Void> deletar(
             @PathVariable Long id) {
 
