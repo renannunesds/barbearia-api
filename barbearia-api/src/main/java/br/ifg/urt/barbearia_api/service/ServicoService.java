@@ -5,40 +5,50 @@ import br.ifg.urt.barbearia_api.dto.response.ServicoResponseDTO;
 import br.ifg.urt.barbearia_api.mapper.ServicoMapper;
 import br.ifg.urt.barbearia_api.model.Servico;
 import br.ifg.urt.barbearia_api.repository.ServicoRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 public class ServicoService {
 
     private final ServicoRepository servicoRepository;
-    private final ServicoMapper servicoMapper; // Injetando o novo Mapper do MapStruct
+    private final ServicoMapper servicoMapper;
 
     public ServicoService(ServicoRepository servicoRepository, ServicoMapper servicoMapper) {
         this.servicoRepository = servicoRepository;
         this.servicoMapper = servicoMapper;
     }
 
+    @Transactional
     public ServicoResponseDTO criar(ServicoRequestDTO dto) {
         Servico servico = servicoMapper.toEntity(dto);
         return servicoMapper.toResponseDTO(servicoRepository.save(servico));
     }
 
-    public List<ServicoResponseDTO> listar() {
-        return servicoMapper.toResponseDTOList(servicoRepository.findAll());
+    // ATUALIZADO: Usando a listagem global paginada com filtro opcional por nome
+    public Page<ServicoResponseDTO> listar(String nome, Pageable pageable) {
+        Page<Servico> servicosPage;
+        if (nome != null && !nome.isBlank()) {
+            servicosPage = servicoRepository.findByNomeContainingIgnoreCase(nome, pageable);
+        } else {
+            servicosPage = servicoRepository.findAll(pageable);
+        }
+        return servicosPage.map(servicoMapper::toResponseDTO);
     }
 
     public ServicoResponseDTO buscarPorId(Long id) {
-        Servico servico = servicoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Serviço não encontrado"));
-
+        // ATUALIZADO: Usando o método padrão do Repository
+        Servico servico = servicoRepository.findByIdOrThrow(id);
         return servicoMapper.toResponseDTO(servico);
     }
 
+    @Transactional
     public ServicoResponseDTO atualizar(Long id, ServicoRequestDTO dto) {
-        Servico servico = servicoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Serviço não encontrado"));
+        // ATUALIZADO: Usando o método padrão do Repository
+        Servico servico = servicoRepository.findByIdOrThrow(id);
 
         servico.setNome(dto.nome());
         servico.setDescricao(dto.descricao());
@@ -47,10 +57,10 @@ public class ServicoService {
         return servicoMapper.toResponseDTO(servicoRepository.save(servico));
     }
 
+    @Transactional
     public void deletar(Long id) {
-        Servico servico = servicoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Serviço não encontrado"));
-
+        // ATUALIZADO: Usando o método padrão do Repository
+        Servico servico = servicoRepository.findByIdOrThrow(id);
         servicoRepository.delete(servico);
     }
 }

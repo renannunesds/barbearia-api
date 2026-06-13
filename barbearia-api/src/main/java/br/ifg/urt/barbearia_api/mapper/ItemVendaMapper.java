@@ -10,17 +10,14 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ItemVendaMapper {
 
-    // Se o seu ItemVendaResponseDTO tiver o campo "produtoNome", descomente a linha abaixo.
-    // Caso dê erro nele de novo, pode deixar essa linha inteira comentada/removida.
-    // @Mapping(target = "produtoNome", source = "item.nome")
+    // Buscando o ID e o Nome de dentro do objeto "item" da entidade ItemVenda
+    @Mapping(source = "item.idItem", target = "idItem")
+    @Mapping(source = "item.nome", target = "nomeItem")
     ItemVendaResponseDTO toResponseDTO(ItemVenda itemVenda);
 
     List<ItemVendaResponseDTO> toResponseDTOList(List<ItemVenda> itensVenda);
 
-    // Ignora a chave primária da entidade ao receber a requisição
     @Mapping(target = "idItemVenda", ignore = true)
-    // Ignoramos os valores e o objeto do produto aqui, pois você irá associar e setar
-    // esses valores direto na sua classe Service usando o dto.idItem()
     @Mapping(target = "valorUnitario", ignore = true)
     @Mapping(target = "subtotal", ignore = true)
     @Mapping(target = "item", ignore = true)
