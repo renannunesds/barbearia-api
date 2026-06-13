@@ -1,5 +1,6 @@
 package br.ifg.urt.barbearia_api.controller;
 
+import br.ifg.urt.barbearia_api.assembler.BarbeiroModelAssembler;
 import br.ifg.urt.barbearia_api.dto.request.BarbeiroRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.BarbeiroResponseDTO;
 import br.ifg.urt.barbearia_api.service.BarbeiroService;
@@ -15,6 +16,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,28 +32,37 @@ import org.springframework.web.bind.annotation.*;
 public class BarbeiroController {
 
     private final BarbeiroService service;
+    private final BarbeiroModelAssembler assembler; // 1. Injetando o seu Assembler customizado
 
-    public BarbeiroController(BarbeiroService service) {
+    // Atualizado o construtor para receber o assembler
+    public BarbeiroController(BarbeiroService service, BarbeiroModelAssembler assembler) {
         this.service = service;
+        this.assembler = assembler;
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Listar barbeiros paginados",
-            description = "Retorna uma página de barbeiros com suas respectivas especialidades. Permite filtrar por nome.",
+            description = "Retorna uma página de barbeiros com seus respectivos links HATEOAS de navegação.",
             responses = {
                     @ApiResponse(description = "Sucesso", responseCode = "200",
-                            content = @Content(schema = @Schema(implementation = Page.class))),
+                            content = @Content(schema = @Schema(implementation = PagedModel.class))),
                     @ApiResponse(description = "Erro Interno", responseCode = "500", content = @Content)
             }
     )
     @Cacheable(value = "barbeirosCache", key = "{#nome, #pageable.pageNumber, #pageable.pageSize}")
-    public ResponseEntity<Page<BarbeiroResponseDTO>> buscarTodos(
+    public ResponseEntity<PagedModel<EntityModel<BarbeiroResponseDTO>>> buscarTodos(
             @RequestParam(required = false) String nome,
-            @ParameterObject @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
+            @ParameterObject @PageableDefault(size = 10, sort = "nome") Pageable pageable,
+            PagedResourcesAssembler<BarbeiroResponseDTO> pagedResourcesAssembler) { // 2. Recebe o assembler nativo do Spring HATEOAS para paginação
 
         System.out.println("### CONSULTANDO BARBEIROS NO BANCO DE DADOS... ###");
-        return ResponseEntity.ok(service.findAll(nome, pageable));
+        Page<BarbeiroResponseDTO> barbeirosPage = service.findAll(nome, pageable);
+
+        // 3. Converte a página comum em um PagedModel inteligente com links "first", "next", "prev", "last"
+        PagedModel<EntityModel<BarbeiroResponseDTO>> pagedModel = pagedResourcesAssembler.toModel(barbeirosPage, assembler);
+
+        return ResponseEntity.ok(pagedModel);
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -62,8 +75,10 @@ public class BarbeiroController {
                     @ApiResponse(description = "Barbeiro não encontrado", responseCode = "404", content = @Content)
             }
     )
-    public ResponseEntity<BarbeiroResponseDTO> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<EntityModel<BarbeiroResponseDTO>> buscarPorId(@PathVariable Long id) {
+        BarbeiroResponseDTO dto = service.findById(id);
+        // Envelopa o DTO aplicando os links configurados no assembler
+        return ResponseEntity.ok(assembler.toModel(dto));
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -77,11 +92,11 @@ public class BarbeiroController {
             }
     )
     @CacheEvict(value = "barbeirosCache", allEntries = true)
-    public ResponseEntity<BarbeiroResponseDTO> criar(@Valid @RequestBody BarbeiroRequestDTO dto) {
+    public ResponseEntity<EntityModel<BarbeiroResponseDTO>> criar(@Valid @RequestBody BarbeiroRequestDTO dto) {
         BarbeiroResponseDTO novoBarbeiro = service.create(dto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(novoBarbeiro);
+                .body(assembler.toModel(novoBarbeiro));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -96,10 +111,11 @@ public class BarbeiroController {
             }
     )
     @CacheEvict(value = "barbeirosCache", allEntries = true)
-    public ResponseEntity<BarbeiroResponseDTO> atualizar(
+    public ResponseEntity<EntityModel<BarbeiroResponseDTO>> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody BarbeiroRequestDTO dto) {
-        return ResponseEntity.ok(service.update(id, dto));
+        BarbeiroResponseDTO barbeiroAtualizado = service.update(id, dto);
+        return ResponseEntity.ok(assembler.toModel(barbeiroAtualizado));
     }
 
     @PatchMapping("/{id}/ativar")

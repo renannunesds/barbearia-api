@@ -1,5 +1,6 @@
 package br.ifg.urt.barbearia_api.controller;
 
+import br.ifg.urt.barbearia_api.assembler.UsuarioModelAssembler;
 import br.ifg.urt.barbearia_api.dto.request.UsuarioRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.UsuarioResponseDTO;
 import br.ifg.urt.barbearia_api.service.UsuarioService;
@@ -15,6 +16,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,27 +32,36 @@ import org.springframework.web.bind.annotation.*;
 public class UsuarioController {
 
     private final UsuarioService service;
+    private final UsuarioModelAssembler assembler; // 1. Injetando seu assembler customizado
 
-    public UsuarioController(UsuarioService service) {
+    // Construtor atualizado recebendo o assembler
+    public UsuarioController(UsuarioService service, UsuarioModelAssembler assembler) {
         this.service = service;
+        this.assembler = assembler;
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Listar usuários paginados",
-            description = "Retorna uma listagem paginada dos perfis de usuários que possuem credenciais no sistema.",
+            description = "Retorna uma listagem paginada dos perfis de usuários com seus respectivos links HATEOAS.",
             responses = {
                     @ApiResponse(description = "Sucesso", responseCode = "200",
-                            content = @Content(schema = @Schema(implementation = Page.class))),
+                            content = @Content(schema = @Schema(implementation = PagedModel.class))),
                     @ApiResponse(description = "Erro Interno", responseCode = "500", content = @Content)
             }
     )
     @Cacheable(value = "usuariosCache", key = "{#pageable.pageNumber, #pageable.pageSize}")
-    public ResponseEntity<Page<UsuarioResponseDTO>> buscarTodos(
-            @ParameterObject @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
+    public ResponseEntity<PagedModel<EntityModel<UsuarioResponseDTO>>> buscarTodos(
+            @ParameterObject @PageableDefault(size = 10, sort = "nome") Pageable pageable,
+            PagedResourcesAssembler<UsuarioResponseDTO> pagedResourcesAssembler) { // 2. Adicionado o gerenciador de páginas nativo do HATEOAS
 
         System.out.println("### CONSULTANDO USUÁRIOS NO BANCO DE DADOS... ###");
-        return ResponseEntity.ok(service.findAll(pageable));
+        Page<UsuarioResponseDTO> usuariosPage = service.findAll(pageable);
+
+        // 3. Transforma o Page comum no PagedModel inteligente com links "first", "next", etc.
+        PagedModel<EntityModel<UsuarioResponseDTO>> pagedModel = pagedResourcesAssembler.toModel(usuariosPage, assembler);
+
+        return ResponseEntity.ok(pagedModel);
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -61,8 +74,10 @@ public class UsuarioController {
                     @ApiResponse(description = "Usuário não encontrado", responseCode = "404", content = @Content)
             }
     )
-    public ResponseEntity<UsuarioResponseDTO> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<EntityModel<UsuarioResponseDTO>> buscarPorId(@PathVariable Long id) {
+        UsuarioResponseDTO dto = service.findById(id);
+        // Envelopa a resposta gerando os links automáticos
+        return ResponseEntity.ok(assembler.toModel(dto));
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -76,11 +91,11 @@ public class UsuarioController {
             }
     )
     @CacheEvict(value = "usuariosCache", allEntries = true)
-    public ResponseEntity<UsuarioResponseDTO> criar(@Valid @RequestBody UsuarioRequestDTO dto) {
+    public ResponseEntity<EntityModel<UsuarioResponseDTO>> criar(@Valid @RequestBody UsuarioRequestDTO dto) {
         UsuarioResponseDTO novoUsuario = service.create(dto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(novoUsuario);
+                .body(assembler.toModel(novoUsuario));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -95,10 +110,11 @@ public class UsuarioController {
             }
     )
     @CacheEvict(value = "usuariosCache", allEntries = true)
-    public ResponseEntity<UsuarioResponseDTO> atualizar(
+    public ResponseEntity<EntityModel<UsuarioResponseDTO>> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody UsuarioRequestDTO dto) {
-        return ResponseEntity.ok(service.update(id, dto));
+        UsuarioResponseDTO usuarioAtualizado = service.update(id, dto);
+        return ResponseEntity.ok(assembler.toModel(usuarioAtualizado));
     }
 
     @DeleteMapping("/{id}")
