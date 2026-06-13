@@ -11,22 +11,19 @@ import br.ifg.urt.barbearia_api.repository.AgendamentoRepository;
 import br.ifg.urt.barbearia_api.repository.BarbeiroRepository;
 import br.ifg.urt.barbearia_api.repository.ClienteRepository;
 import br.ifg.urt.barbearia_api.repository.ServicoRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class AgendamentoService {
 
-    // Dependências declaradas como final (Injeção por construtor limpa)
     private final AgendamentoRepository agendamentoRepository;
     private final BarbeiroRepository barbeiroRepository;
     private final ClienteRepository clienteRepository;
     private final ServicoRepository servicoRepository;
     private final AgendamentoMapper agendamentoMapper;
 
-    // Construtor que substitui todos os @Autowired
     public AgendamentoService(AgendamentoRepository agendamentoRepository,
                               BarbeiroRepository barbeiroRepository,
                               ClienteRepository clienteRepository,
@@ -71,32 +68,30 @@ public class AgendamentoService {
     }
 
     // 2. LISTAR TODOS
-    public List<AgendamentoResponseDTO> listarTodos() {
-        return agendamentoRepository.findAll().stream()
-                .map(agendamentoMapper::entityToResponse)
-                .collect(Collectors.toList());
+    public Page<AgendamentoResponseDTO> listarTodos(Pageable pageable) {
+        return agendamentoRepository.findAll(pageable)
+                .map(agendamentoMapper::entityToResponse);
     }
 
-    // 3. BUSCAR POR ID (Necessário para o seu Controller)
+    // 3. BUSCAR POR ID
     public AgendamentoResponseDTO buscarPorId(Long id) {
         Agendamento agendamento = agendamentoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Agendamento de ID " + id + " não encontrado!"));
         return agendamentoMapper.entityToResponse(agendamento);
     }
 
-    // 4. DELETAR (Necessário para o seu Controller)
+    // 4. DELETAR
     public void deletar(Long id) {
         Agendamento agendamento = agendamentoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Agendamento de ID " + id + " não encontrado!"));
         agendamentoRepository.delete(agendamento);
     }
 
-    // 5. ATUALIZAR (Necessário para o seu Controller e corrigido sem o bug do status)
+    // 5. ATUALIZAR
     public AgendamentoResponseDTO atualizar(Long id, AgendamentoRequestDTO dto) {
         Agendamento agendamentoExistente = agendamentoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Agendamento de ID " + id + " não encontrado!"));
 
-        // Valida se o novo horário escolhido não vai colidir
         if (!agendamentoExistente.getHorario().equals(dto.horario()) || !agendamentoExistente.getData().equals(dto.data())) {
             boolean horarioOcupado = agendamentoRepository.existsByBarbeiroAndDataAndHorario(
                     agendamentoExistente.getBarbeiro(), dto.data(), dto.horario()

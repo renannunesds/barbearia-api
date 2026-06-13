@@ -9,15 +9,17 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/agendamentos")
@@ -51,18 +53,19 @@ public class AgendamentoController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
-            summary = "Listar todos os agendamentos",
-            description = "Retorna uma lista com todos os agendamentos cadastrados no sistema.",
+            summary = "Listar agendamentos paginados",
+            description = "Retorna uma página de agendamentos cadastrados no sistema.",
             responses = {
                     @ApiResponse(description = "Sucesso", responseCode = "200",
-                            content = @Content(schema = @Schema(implementation = List.class))),
+                            content = @Content(schema = @Schema(implementation = Page.class))),
                     @ApiResponse(description = "Erro Interno", responseCode = "500", content = @Content)
             }
     )
-    @Cacheable(value = "agendamentosCache")
-    public ResponseEntity<List<AgendamentoResponseDTO>> listarTodos() {
+    @Cacheable(value = "agendamentosCache", key = "{#pageable.pageNumber, #pageable.pageSize}")
+    public ResponseEntity<Page<AgendamentoResponseDTO>> listarTodos(
+            @ParameterObject @PageableDefault(size = 10, sort = "data") Pageable pageable) {
 
-        return ResponseEntity.ok(agendamentoService.listarTodos());
+        return ResponseEntity.ok(agendamentoService.listarTodos(pageable));
     }
 
     // Buscar agendamento por ID
