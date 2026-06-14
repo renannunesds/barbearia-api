@@ -1,10 +1,14 @@
 package br.ifg.urt.barbearia_api.controller;
 
+import br.ifg.urt.barbearia_api.assembler.ServicoModelAssembler;
 import br.ifg.urt.barbearia_api.dto.request.ServicoRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.ServicoResponseDTO;
 import br.ifg.urt.barbearia_api.service.ServicoService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler; // Adicionado
+import org.springframework.hateoas.EntityModel; // Adicionado
+import org.springframework.hateoas.PagedModel; // Adicionado
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -12,9 +16,15 @@ import org.springframework.web.bind.annotation.*;
 public class ServicoController {
 
     private final ServicoService servicoService;
+    private final ServicoModelAssembler assembler; // Adicionado
+    private final PagedResourcesAssembler<ServicoResponseDTO> pagedResourcesAssembler; // Adicionado
 
-    public ServicoController(ServicoService servicoService) {
+    public ServicoController(ServicoService servicoService,
+                             ServicoModelAssembler assembler,
+                             PagedResourcesAssembler<ServicoResponseDTO> pagedResourcesAssembler) {
         this.servicoService = servicoService;
+        this.assembler = assembler;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @PostMapping
@@ -23,16 +33,18 @@ public class ServicoController {
     }
 
     @GetMapping
-    public Page<ServicoResponseDTO> listar(
-            @RequestParam(required = false) String nome,
-            Pageable pageable
+    public PagedModel<EntityModel<ServicoResponseDTO>> listar( // Atualizado para Paged HATEOAS
+                                                               @RequestParam(required = false) String nome,
+                                                               Pageable pageable
     ) {
-        return servicoService.listar(nome, pageable);
+        Page<ServicoResponseDTO> page = servicoService.listar(nome, pageable);
+        return pagedResourcesAssembler.toModel(page, assembler);
     }
 
     @GetMapping("/{id}")
-    public ServicoResponseDTO buscarPorId(@PathVariable Long id) {
-        return servicoService.buscarPorId(id);
+    public EntityModel<ServicoResponseDTO> buscarPorId(@PathVariable Long id) { // Atualizado para HATEOAS
+        ServicoResponseDTO dto = servicoService.buscarPorId(id);
+        return assembler.toModel(dto);
     }
 
     @PutMapping("/{id}")
