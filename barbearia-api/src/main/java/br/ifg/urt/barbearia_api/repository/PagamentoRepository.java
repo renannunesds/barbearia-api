@@ -7,4 +7,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
 
+    default Pagamento findByIdOrThrow(Long id) {
+        return findById(id)
+                .orElseThrow(() -> new RuntimeException("Pagamento não encontrado com ID: " + id));
+    }
 }

@@ -10,6 +10,7 @@ import br.ifg.urt.barbearia_api.repository.PagamentoRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PagamentoService {
@@ -26,37 +27,36 @@ public class PagamentoService {
         this.pagamentoMapper = pagamentoMapper;
     }
 
-    // Regra de negócio: Processa o pagamento e vincula ao agendamento
+    @Transactional
     public PagamentoResponseDTO processarPagamento(PagamentoRequestDTO dto) {
-        // Verifica se o agendamento existe
-        Agendamento agendamento = agendamentoRepository.findById(dto.idAgendamento())
-                .orElseThrow(() -> new RuntimeException("Agendamento não encontrado"));
+        // Agendamento usa o método padrão findByIdOrThrow também (se implementado no AgendamentoRepository)
+        Agendamento agendamento = agendamentoRepository.findByIdOrThrow(dto.idAgendamento());
 
-        // Atualiza status do agendamento para concluído após o pagamento
         agendamento.setStatus("CONCLUIDO");
         agendamentoRepository.save(agendamento);
 
-        // Transforma DTO em Entidade, vincula o agendamento e confirma o status
         Pagamento pagamento = pagamentoMapper.requestToEntity(dto);
         pagamento.setAgendamento(agendamento);
         pagamento.confirmarPagamento();
 
-        // Persiste no banco e retorna o DTO de resposta
         Pagamento salvo = pagamentoRepository.save(pagamento);
         return pagamentoMapper.entityToResponse(salvo);
     }
 
-    // Lista paginada: Evita trazer todos os registros
     public Page<PagamentoResponseDTO> listarTodos(Pageable pageable) {
-        // O findAll(pageable) retorna uma página de entidades, o map converte para DTO
         return pagamentoRepository.findAll(pageable)
                 .map(pagamentoMapper::entityToResponse);
     }
 
-    // Busca detalhada por ID
     public PagamentoResponseDTO buscarPorId(Long id) {
-        Pagamento pagamento = pagamentoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pagamento de ID " + id + " não encontrado!"));
+        Pagamento pagamento = pagamentoRepository.findByIdOrThrow(id);
         return pagamentoMapper.entityToResponse(pagamento);
+    }
+
+    @Transactional
+    public void estornarPagamento(Long id) {
+        Pagamento pagamento = pagamentoRepository.findByIdOrThrow(id);
+        pagamento.estornarPagamento();
+        pagamentoRepository.save(pagamento);
     }
 }

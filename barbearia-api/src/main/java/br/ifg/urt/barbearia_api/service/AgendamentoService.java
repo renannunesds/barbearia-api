@@ -14,6 +14,7 @@ import br.ifg.urt.barbearia_api.repository.ServicoRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AgendamentoService {
@@ -36,22 +37,15 @@ public class AgendamentoService {
         this.agendamentoMapper = agendamentoMapper;
     }
 
-    // 1. CRIAR AGENDAMENTO
+    @Transactional
     public AgendamentoResponseDTO criarAgendamento(AgendamentoRequestDTO dto) {
-        Barbeiro barbeiro = barbeiroRepository.findById(dto.idBarbeiro())
-                .orElseThrow(() -> new RuntimeException("Barbeiro não encontrado"));
-
-        Cliente cliente = clienteRepository.findById(dto.idCliente())
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
-
-        Servico servico = servicoRepository.findById(dto.idServico())
-                .orElseThrow(() -> new RuntimeException("Serviço não encontrado"));
+        // Usando o padrão de buscar por ID ou lançar exceção (assumindo que adicionou findByIdOrThrow nos repos)
+        Barbeiro barbeiro = barbeiroRepository.findByIdOrThrow(dto.idBarbeiro());
+        Cliente cliente = clienteRepository.findByIdOrThrow(dto.idCliente());
+        Servico servico = servicoRepository.findByIdOrThrow(dto.idServico());
 
         boolean barbeiroOcupado = agendamentoRepository.existsByBarbeiroAndDataAndHorario(
-                barbeiro,
-                dto.data(),
-                dto.horario()
-        );
+                barbeiro, dto.data(), dto.horario());
 
         if (barbeiroOcupado) {
             throw new RuntimeException("Este barbeiro já possui um agendamento neste horário!");
@@ -67,30 +61,39 @@ public class AgendamentoService {
         return agendamentoMapper.entityToResponse(salvo);
     }
 
-    // 2. LISTAR TODOS
     public Page<AgendamentoResponseDTO> listarTodos(Pageable pageable) {
         return agendamentoRepository.findAll(pageable)
                 .map(agendamentoMapper::entityToResponse);
     }
 
-    // 3. BUSCAR POR ID
     public AgendamentoResponseDTO buscarPorId(Long id) {
-        Agendamento agendamento = agendamentoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Agendamento de ID " + id + " não encontrado!"));
+        Agendamento agendamento = agendamentoRepository.findByIdOrThrow(id);
         return agendamentoMapper.entityToResponse(agendamento);
     }
 
-    // 4. DELETAR
+    @Transactional
+    public void confirmarAgendamento(Long id) {
+        Agendamento agendamento = agendamentoRepository.findByIdOrThrow(id);
+        agendamento.confirmarAgendamento();
+        agendamentoRepository.save(agendamento);
+    }
+
+    @Transactional
+    public void cancelarAgendamento(Long id) {
+        Agendamento agendamento = agendamentoRepository.findByIdOrThrow(id);
+        agendamento.cancelarAgendamento();
+        agendamentoRepository.save(agendamento);
+    }
+
+    @Transactional
     public void deletar(Long id) {
-        Agendamento agendamento = agendamentoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Agendamento de ID " + id + " não encontrado!"));
+        Agendamento agendamento = agendamentoRepository.findByIdOrThrow(id);
         agendamentoRepository.delete(agendamento);
     }
 
-    // 5. ATUALIZAR
+    @Transactional
     public AgendamentoResponseDTO atualizar(Long id, AgendamentoRequestDTO dto) {
-        Agendamento agendamentoExistente = agendamentoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Agendamento de ID " + id + " não encontrado!"));
+        Agendamento agendamentoExistente = agendamentoRepository.findByIdOrThrow(id);
 
         if (!agendamentoExistente.getHorario().equals(dto.horario()) || !agendamentoExistente.getData().equals(dto.data())) {
             boolean horarioOcupado = agendamentoRepository.existsByBarbeiroAndDataAndHorario(

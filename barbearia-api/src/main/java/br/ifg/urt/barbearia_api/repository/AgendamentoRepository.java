@@ -13,6 +13,11 @@ import java.time.LocalTime;
 @Repository
 public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> {
 
+    default Agendamento findByIdOrThrow(Long id) {
+        return findById(id)
+                .orElseThrow(() -> new RuntimeException("Agendamento não encontrado com ID: " + id));
+    }
+
     @Query("SELECT COUNT(a) > 0 FROM Agendamento a WHERE a.barbeiro = :barbeiro AND a.data = :data AND a.horario = :horario")
     boolean existsByBarbeiroAndDataAndHorario(
             @Param("barbeiro") Barbeiro barbeiro,
