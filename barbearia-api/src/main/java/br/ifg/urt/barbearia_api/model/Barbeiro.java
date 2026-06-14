@@ -3,7 +3,6 @@ package br.ifg.urt.barbearia_api.model;
 import br.ifg.urt.barbearia_api.model.vo.EmailVO;
 import br.ifg.urt.barbearia_api.model.vo.TelefoneVO;
 import br.ifg.urt.barbearia_api.model.vo.SenhaVO;
-import org.hibernate.annotations.BatchSize;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,22 +17,22 @@ public class Barbeiro extends Usuario implements Serializable {
     @Column(nullable = false)
     private Boolean ativo;
 
+    // Relacionamento simplificado: Barbeiro para Servico
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "barbeiro_especialidade",
+            name = "barbeiro_servico",
             joinColumns = @JoinColumn(name = "id_barbeiro"),
-            inverseJoinColumns = @JoinColumn(name = "id_especialidade")
+            inverseJoinColumns = @JoinColumn(name = "id_servico")
     )
-    @BatchSize(size = 10) // CORRIGIDO: Carrega as especialidades em lotes para evitar o aviso de paginação em memória
-    private List<Especialidade> especialidades = new ArrayList<>();
+    private List<Servico> servicos = new ArrayList<>();
 
     public Barbeiro() {
     }
 
     public Barbeiro(Long id, String nome, EmailVO email, TelefoneVO telefone, SenhaVO senha,
-                    List<Especialidade> especialidades, Boolean ativo) {
+                    List<Servico> servicos, Boolean ativo) {
         super(id, nome, email, telefone, senha);
-        this.especialidades = especialidades;
+        this.servicos = servicos;
         this.ativo = ativo;
     }
 
@@ -45,12 +44,12 @@ public class Barbeiro extends Usuario implements Serializable {
         this.ativo = ativo;
     }
 
-    public List<Especialidade> getEspecialidades() {
-        return especialidades;
+    public List<Servico> getServicos() {
+        return servicos;
     }
 
-    public void setEspecialidades(List<Especialidade> especialidades) {
-        this.especialidades = especialidades;
+    public void setServicos(List<Servico> servicos) {
+        this.servicos = servicos;
     }
 
     public void activarBarbeiro() {

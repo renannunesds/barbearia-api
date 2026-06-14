@@ -23,8 +23,8 @@ public record BarbeiroRequestDTO(
         @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres")
         String senha,
 
-        @NotEmpty(message = "A lista de especialidades é obrigatória")
-        List<Long> especialidades,
+        @NotEmpty(message = "A lista de serviços é obrigatória")
+        List<Long> servicos,
 
         Boolean ativo
 

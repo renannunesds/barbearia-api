@@ -7,7 +7,7 @@ public record BarbeiroResponseDTO(
         String nome,
         String email,
         String telefone,
-        List<String> especialidades,
+        List<String> servicos,
         Boolean ativo
 ) {
 }
