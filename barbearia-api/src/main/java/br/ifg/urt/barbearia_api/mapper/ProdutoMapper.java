@@ -15,7 +15,7 @@ public interface ProdutoMapper {
     @Mapping(target = "descricao", source = "produto.descricao")
     @Mapping(target = "valor", source = "produto.valor")
 
-    @Mapping(target = "quantidadeEstoqu", source = "produto.quantidadeEstoque")
+    @Mapping(target = "quantidadeEstoque", source = "produto.quantidadeEstoque")
     ProdutoResponseDTO toResponseDTO(Produto produto);
 
     List<ProdutoResponseDTO> toResponseDTOList(List<Produto> produtos);
