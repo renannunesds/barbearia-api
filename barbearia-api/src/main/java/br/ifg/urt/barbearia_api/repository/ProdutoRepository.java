@@ -15,7 +15,6 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado com ID: " + id));
     }
 
-    // Como o nome fica na tabela herdada (Item), o Spring Data JPA consegue buscar por aqui
     Page<Produto> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
 
     List<Produto> findAllByOrderByNomeAsc();

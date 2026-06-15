@@ -7,7 +7,7 @@ import java.math.BigDecimal;
             String nome,
             String descricao,
             BigDecimal valor,
-            Integer quantidadeEstoqu
+            Integer quantidadeEstoque
     ) {
     }
 

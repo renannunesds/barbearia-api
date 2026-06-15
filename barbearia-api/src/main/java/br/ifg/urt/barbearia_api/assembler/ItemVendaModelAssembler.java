@@ -14,7 +14,6 @@ public class ItemVendaModelAssembler implements RepresentationModelAssembler<Ite
     @Override
     public EntityModel<ItemVendaResponseDTO> toModel(ItemVendaResponseDTO dto) {
         return EntityModel.of(dto,
-                // 🔥 CORRIGIDO: Trocado de dto.id() para dto.idItemVenda()
                 linkTo(methodOn(ItemVendaController.class).buscarPorId(dto.idItemVenda())).withSelfRel(),
                 linkTo(methodOn(ItemVendaController.class).listar()).withRel("itens-venda"));
     }

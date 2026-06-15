@@ -21,7 +21,7 @@ import java.util.List;
 public class BarbeiroService {
 
     private final BarbeiroRepository repository;
-    private final ServicoRepository servicoRepository; // Injeta ServicoRepository
+    private final ServicoRepository servicoRepository;
     private final BarbeiroMapper mapper;
 
     public BarbeiroService(BarbeiroRepository repository, ServicoRepository servicoRepository, BarbeiroMapper mapper) {
@@ -38,7 +38,7 @@ public class BarbeiroService {
     }
 
     public BarbeiroResponseDTO findById(Long id) {
-        Barbeiro barbeiro = repository.findByIdOrThrow(id); // Usando seu método de conveniência
+        Barbeiro barbeiro = repository.findByIdOrThrow(id);
         return mapper.toResponseDTO(barbeiro);
     }
 
@@ -46,7 +46,6 @@ public class BarbeiroService {
     public BarbeiroResponseDTO create(BarbeiroRequestDTO dto) {
         Barbeiro barbeiro = mapper.toEntity(dto);
 
-        // Agora lidamos com lista de servicos
         if (dto.servicos() != null && !dto.servicos().isEmpty()) {
             List<Servico> servicosCarregados = servicoRepository.findAllById(dto.servicos());
             barbeiro.setServicos(servicosCarregados);
@@ -67,7 +66,6 @@ public class BarbeiroService {
         barbeiroExistente.setSenha(new SenhaVO(dto.senha()));
         barbeiroExistente.setAtivo(dto.ativo());
 
-        // Atualização da lista de serviços
         if (dto.servicos() != null) {
             barbeiroExistente.setServicos(servicoRepository.findAllById(dto.servicos()));
         }

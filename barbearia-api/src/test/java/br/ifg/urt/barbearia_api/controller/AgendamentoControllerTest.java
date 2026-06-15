@@ -80,7 +80,6 @@ class AgendamentoControllerTest {
         // Arrange
         AgendamentoRequestDTO request = AgendamentoMother.requestValido();
 
-        // Força o Service mockado a disparar o erro customizado que você criou
         when(agendamentoService.criarAgendamento(any(AgendamentoRequestDTO.class)))
                 .thenThrow(new AgendamentoInvalidoException("Este barbeiro já possui um agendamento neste horário!"));
 
@@ -88,6 +87,6 @@ class AgendamentoControllerTest {
         mockMvc.perform(post("/agendamentos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest()); // Garante que a API retorna o HTTP 400 certinho
+                .andExpect(status().isBadRequest());
     }
 }

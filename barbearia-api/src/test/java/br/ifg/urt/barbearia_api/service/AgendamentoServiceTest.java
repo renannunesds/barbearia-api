@@ -59,7 +59,6 @@ class AgendamentoServiceTest {
         when(barbeiroRepository.findByIdOrThrow(any())).thenReturn(new Barbeiro());
         when(agendamentoRepository.existsByBarbeiroAndDataAndHorario(any(), any(), any())).thenReturn(true);
 
-        // MUDADO AQUI: Agora valida se o método joga a AgendamentoInvalidoException de verdade!
         assertThrows(AgendamentoInvalidoException.class, () -> agendamentoService.criarAgendamento(dto));
 
         verify(agendamentoRepository, never()).save(any());

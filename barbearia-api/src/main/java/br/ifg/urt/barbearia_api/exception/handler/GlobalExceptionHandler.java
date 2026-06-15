@@ -17,7 +17,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestController
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    // 1. Captura erros de Recursos Não Encontrados (404)
     @ExceptionHandler(ResourceNotFoundException.class)
     public final ResponseEntity<ExceptionResponse> handleNotFoundExceptions(
             Exception ex, WebRequest request) {
@@ -30,20 +29,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
     }
 
-    // 2. Captura regras de negócio inválidas e devolve a mensagem real (400 Bad Request)
     @ExceptionHandler({AgendamentoInvalidoException.class, PagamentoRecusadoException.class})
     public final ResponseEntity<ExceptionResponse> handleBadRequestExceptions(
             Exception ex, WebRequest request) {
 
         ExceptionResponse exceptionResponse = new ExceptionResponse(
                 LocalDateTime.now(),
-                ex.getMessage(), // Aqui vai mostrar a mensagem real: "Este barbeiro já possui um agendamento..."
+                ex.getMessage(),
                 request.getDescription(false));
 
         return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
     }
 
-    // 3. Captura qualquer outro erro inesperado do sistema (500)
+
     @ExceptionHandler(Exception.class)
     public final ResponseEntity<ExceptionResponse> handleAllExceptions(
             Exception ex, WebRequest request) {

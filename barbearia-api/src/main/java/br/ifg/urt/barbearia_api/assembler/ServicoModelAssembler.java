@@ -16,10 +16,7 @@ public class ServicoModelAssembler implements RepresentationModelAssembler<Servi
     @Override
     public EntityModel<ServicoResponseDTO> toModel(ServicoResponseDTO dto) {
         return EntityModel.of(dto,
-                // 1. 🔥 CORRIGIDO: Trocado para dto.idItem() para bater com o seu record
                 linkTo(methodOn(ServicoController.class).buscarPorId(dto.idItem())).withSelfRel(),
-
-                // 2. 🔥 CORRIGIDO: Passando os 3 argumentos exatos (nome, pageable, assembler) que a rota exige
                 linkTo(methodOn(ServicoController.class).listar(null, Pageable.unpaged(), null)).withRel("servicos"));
     }
 }

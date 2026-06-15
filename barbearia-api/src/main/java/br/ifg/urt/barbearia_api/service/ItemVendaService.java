@@ -36,12 +36,9 @@ public class ItemVendaService {
         itemVenda.setItem(item);
         itemVenda.setValorUnitario(item.getValor());
 
-        // CORREÇÃO: Sem instanceof ou casting redundante.
-        // Se o valor for nulo, usamos o ZERO, senão usamos o próprio valor.
         BigDecimal valorOriginal = (item.getValor() != null) ? item.getValor() : BigDecimal.ZERO;
         BigDecimal subtotal = valorOriginal.multiply(BigDecimal.valueOf(dto.quantidade()));
 
-        // CORREÇÃO: Setamos o subtotal no objeto para a variável não ficar sem uso
         itemVenda.setSubtotal(subtotal);
 
         ItemVenda salvo = itemVendaRepository.save(itemVenda);
@@ -53,7 +50,6 @@ public class ItemVendaService {
     }
 
     public ItemVendaResponseDTO buscarPorId(Long id) {
-        // ATUALIZADO: Usando findByIdOrThrow do ItemVendaRepository
         ItemVenda itemVenda = itemVendaRepository.findByIdOrThrow(id);
         return itemVendaMapper.toResponseDTO(itemVenda);
     }
@@ -67,11 +63,9 @@ public class ItemVendaService {
         itemVendaExistente.setQuantidade(dto.quantidade());
         itemVendaExistente.setValorUnitario(item.getValor());
 
-        // CORREÇÃO: Limpeza do casting e instanceof redundante
         BigDecimal valorOriginal = (item.getValor() != null) ? item.getValor() : BigDecimal.ZERO;
         BigDecimal subtotal = valorOriginal.multiply(BigDecimal.valueOf(dto.quantidade()));
 
-        // CORREÇÃO: Setamos o subtotal no objeto existente
         itemVendaExistente.setSubtotal(subtotal);
 
         ItemVenda atualizado = itemVendaRepository.save(itemVendaExistente);
@@ -80,7 +74,6 @@ public class ItemVendaService {
 
     @Transactional
     public void deletar(Long id) {
-        // ATUALIZADO: Usando findByIdOrThrow do ItemVendaRepository
         ItemVenda itemVenda = itemVendaRepository.findByIdOrThrow(id);
         itemVendaRepository.delete(itemVenda);
     }

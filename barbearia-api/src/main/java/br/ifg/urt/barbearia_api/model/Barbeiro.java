@@ -17,7 +17,6 @@ public class Barbeiro extends Usuario implements Serializable {
     @Column(nullable = false)
     private Boolean ativo;
 
-    // Relacionamento simplificado: Barbeiro para Servico
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "barbeiro_servico",

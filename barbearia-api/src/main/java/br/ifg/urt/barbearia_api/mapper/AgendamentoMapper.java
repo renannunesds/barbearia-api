@@ -10,7 +10,7 @@ import org.mapstruct.Mapping;
 public interface AgendamentoMapper {
 
     @Mapping(target = "idAgendamento", ignore = true)
-    @Mapping(target = "status", ignore = true) // Continua ignorado porque você define no Service
+    @Mapping(target = "status", ignore = true)
     @Mapping(target = "cliente", ignore = true)
     @Mapping(target = "barbeiro", ignore = true)
     @Mapping(target = "servico", ignore = true)

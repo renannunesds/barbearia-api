@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional; // Importe corr
 import java.util.List;
 
 @Service
-@Transactional(readOnly = true) // Transforma toda a classe em leitura por padrão
+@Transactional(readOnly = true)
 public class ProdutoService {
 
     private final ProdutoRepository produtoRepository;
@@ -21,25 +21,22 @@ public class ProdutoService {
         this.produtoMapper = produtoMapper;
     }
 
-    @Transactional // Sobrescreve o topo porque este método ESCEVE no banco
+    @Transactional
     public ProdutoResponseDTO criar(ProdutoRequestDTO dto) {
         Produto produto = produtoMapper.toEntity(dto);
         return produtoMapper.toResponseDTO(produtoRepository.save(produto));
     }
 
-    // Não precisa de anotação aqui, herda o readOnly = true do topo
     public List<ProdutoResponseDTO> listar() {
         return produtoMapper.toResponseDTOList(produtoRepository.findAll());
     }
 
-    // Herda o readOnly = true do topo
     public ProdutoResponseDTO buscarPorId(Long id) {
-        // Atualizado para usar o método padrão que criamos no seu Repository!
         Produto produto = produtoRepository.findByIdOrThrow(id);
         return produtoMapper.toResponseDTO(produto);
     }
 
-    @Transactional // Sobrescreve o topo porque este método ALTERA o banco
+    @Transactional
     public ProdutoResponseDTO atualizar(Long id, ProdutoRequestDTO dto) {
         Produto produto = produtoRepository.findByIdOrThrow(id);
 
@@ -50,7 +47,7 @@ public class ProdutoService {
         return produtoMapper.toResponseDTO(produtoRepository.save(produto));
     }
 
-    @Transactional // Sobrescreve o topo porque este método DELETA do banco
+    @Transactional
     public void deletar(Long id) {
         Produto produto = produtoRepository.findByIdOrThrow(id);
         produtoRepository.delete(produto);

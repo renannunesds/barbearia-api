@@ -32,9 +32,8 @@ import org.springframework.web.bind.annotation.*;
 public class ClienteController {
 
     private final ClienteService service;
-    private final ClienteModelAssembler assembler; // 1. Injetando seu assembler customizado
+    private final ClienteModelAssembler assembler;
 
-    // Atualizado o construtor para receber o seu assembler
     public ClienteController(ClienteService service, ClienteModelAssembler assembler) {
         this.service = service;
         this.assembler = assembler;
@@ -59,7 +58,6 @@ public class ClienteController {
         System.out.println("### CONSULTANDO CLIENTES NO BANCO DE DADOS... ###");
         Page<ClienteResponseDTO> clientesPage = service.findAll(nome, pageable);
 
-        // 3. Converte a página em um PagedModel preenchido com hiperlinks de paginação
         PagedModel<EntityModel<ClienteResponseDTO>> pagedModel = pagedResourcesAssembler.toModel(clientesPage, assembler);
 
         return ResponseEntity.ok(pagedModel);
@@ -77,7 +75,7 @@ public class ClienteController {
     )
     public ResponseEntity<EntityModel<ClienteResponseDTO>> buscarPorId(@PathVariable Long id) {
         ClienteResponseDTO dto = service.findById(id);
-        // Envelopa o DTO com o link "self" e o link de listagem
+
         return ResponseEntity.ok(assembler.toModel(dto));
     }
 

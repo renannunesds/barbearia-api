@@ -15,7 +15,6 @@ public class ProdutoModelAssembler implements RepresentationModelAssembler<Produ
     @Override
     public EntityModel<ProdutoResponseDTO> toModel(ProdutoResponseDTO dto) {
         return EntityModel.of(dto,
-                // 🔥 Alterado de dto.id() para dto.idItem()
                 linkTo(methodOn(ProdutoController.class).buscarPorId(dto.idItem())).withSelfRel(),
                 linkTo(methodOn(ProdutoController.class).listar()).withRel("produtos"));
     }

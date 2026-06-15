@@ -23,7 +23,7 @@ public class AgendamentoMother {
                 1L,
                 LocalDate.now().plusDays(1),
                 LocalTime.of(14, 30),
-                "PENDENTE",
+                StatusAgendamento.AGENDADO,
                 cliente,
                 barbeiro,
                 servico,
@@ -46,7 +46,7 @@ public class AgendamentoMother {
                 1L,
                 LocalDate.now().plusDays(1),
                 LocalTime.of(14, 30),
-                "PENDENTE",
+                StatusAgendamento.AGENDADO,
                 "João Silva",
                 "Marcos",
                 "Corte Degradê"

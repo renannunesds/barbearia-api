@@ -19,7 +19,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/pagamentos")
 @Validated
-@Tag(name = "Pagamentos", description = "Endpoints para pagamentos")
+@Tag(name = "Pagamentos", description = "Endpoints para gerenciamento e processamento de pagamentos da barbearia")
 public class PagamentoController {
 
     private final PagamentoService pagamentoService;
@@ -41,29 +40,57 @@ public class PagamentoController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Processar pagamento", responses = {
-            @ApiResponse(description = "Pagamento processado com sucesso", responseCode = "201", content = @Content(schema = @Schema(implementation = PagamentoResponseDTO.class))),
-            @ApiResponse(description = "Regra de negócio violada / Pagamento recusado", responseCode = "422") // <--- Avisa o Swagger do erro 422
-    })
+    @Operation(
+            summary = "Processar novo pagamento",
+            description = "Efetua o processamento de um pagamento para uma venda ativa no sistema.",
+            responses = {
+                    @ApiResponse(description = "Pagamento processado com sucesso", responseCode = "201",
+                            content = @Content(schema = @Schema(implementation = PagamentoResponseDTO.class))),
+                    @ApiResponse(description = "Erro de validação nos dados enviados", responseCode = "400", content = @Content),
+                    @ApiResponse(description = "Regra de negócio violada / Pagamento recusado", responseCode = "422", content = @Content)
+            }
+    )
     @CacheEvict(value = "pagamentosCache", allEntries = true)
     public ResponseEntity<EntityModel<PagamentoResponseDTO>> processar(@RequestBody @Valid PagamentoRequestDTO dto) {
+        System.out.println("### PROCESSANDO NOVO PAGAMENTO... ###");
         PagamentoResponseDTO response = pagamentoService.processarPagamento(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(assembler.toModel(response));
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+            summary = "Listar pagamentos paginados",
+            description = "Retorna uma listagem paginada de todos os pagamentos registrados no sistema.",
+            responses = {
+                    @ApiResponse(description = "Sucesso", responseCode = "200",
+                            content = @Content(schema = @Schema(implementation = PagedModel.class))),
+                    @ApiResponse(description = "Erro Interno", responseCode = "500", content = @Content)
+            }
+    )
     @Cacheable(value = "pagamentosCache", key = "{#pageable.pageNumber, #pageable.pageSize}")
     public ResponseEntity<PagedModel<EntityModel<PagamentoResponseDTO>>> listarTodos(
             @ParameterObject @PageableDefault(size = 10, sort = "dataPagamento") Pageable pageable,
             PagedResourcesAssembler<PagamentoResponseDTO> pagedResourcesAssembler) {
 
+        System.out.println("### CONSULTANDO PAGAMENTOS NO BANCO DE DADOS... ###");
         Page<PagamentoResponseDTO> page = pagamentoService.listarTodos(pageable);
 
-        return ResponseEntity.ok(pagedResourcesAssembler.toModel(page, (RepresentationModelAssembler) assembler));
+
+        return ResponseEntity.ok(pagedResourcesAssembler.toModel(page, assembler));
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+            summary = "Buscar pagamento por ID",
+            description = "Retorna os detalhes de um pagamento específico a partir do ID fornecido.",
+            responses = {
+                    @ApiResponse(description = "Sucesso", responseCode = "200",
+                            content = @Content(schema = @Schema(implementation = PagamentoResponseDTO.class))),
+                    @ApiResponse(description = "Pagamento não encontrado", responseCode = "404", content = @Content)
+            }
+    )
     public ResponseEntity<EntityModel<PagamentoResponseDTO>> buscarPorId(@PathVariable Long id) {
+        System.out.println("### BUSCANDO PAGAMENTO POR ID... ###");
         return ResponseEntity.ok(assembler.toModel(pagamentoService.buscarPorId(id)));
     }
 }

@@ -28,7 +28,6 @@ public class ServicoService {
         return servicoMapper.toResponseDTO(servicoRepository.save(servico));
     }
 
-    // ATUALIZADO: Usando a listagem global paginada com filtro opcional por nome
     public Page<ServicoResponseDTO> listar(String nome, Pageable pageable) {
         Page<Servico> servicosPage;
         if (nome != null && !nome.isBlank()) {
@@ -40,14 +39,12 @@ public class ServicoService {
     }
 
     public ServicoResponseDTO buscarPorId(Long id) {
-        // ATUALIZADO: Usando o método padrão do Repository
         Servico servico = servicoRepository.findByIdOrThrow(id);
         return servicoMapper.toResponseDTO(servico);
     }
 
     @Transactional
     public ServicoResponseDTO atualizar(Long id, ServicoRequestDTO dto) {
-        // ATUALIZADO: Usando o método padrão do Repository
         Servico servico = servicoRepository.findByIdOrThrow(id);
 
         servico.setNome(dto.nome());
@@ -59,7 +56,6 @@ public class ServicoService {
 
     @Transactional
     public void deletar(Long id) {
-        // ATUALIZADO: Usando o método padrão do Repository
         Servico servico = servicoRepository.findByIdOrThrow(id);
         servicoRepository.delete(servico);
     }

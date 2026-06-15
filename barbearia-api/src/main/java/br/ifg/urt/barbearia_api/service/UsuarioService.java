@@ -24,7 +24,6 @@ public class UsuarioService {
         this.mapper = mapper;
     }
 
-    // ATUALIZADO: Listagem global paginada
     public Page<UsuarioResponseDTO> findAll(Pageable pageable) {
         Page<Usuario> usuariosPage = repository.findAll(pageable);
         return usuariosPage.map(mapper::toResponseDTO);

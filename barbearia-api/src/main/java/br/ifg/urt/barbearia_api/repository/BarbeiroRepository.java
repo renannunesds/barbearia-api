@@ -6,11 +6,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface BarbeiroRepository extends JpaRepository<Barbeiro, Long> {
+
+    @Override
+    @EntityGraph(attributePaths = {"servicos"})
+    Optional<Barbeiro> findById(Long id);
 
     default Barbeiro findByIdOrThrow(Long id) {
         return findById(id)
@@ -19,9 +24,11 @@ public interface BarbeiroRepository extends JpaRepository<Barbeiro, Long> {
 
     Optional<Barbeiro> findByEmailEndereco(String email);
 
+    @EntityGraph(attributePaths = {"servicos"})
     Page<Barbeiro> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
 
     @Override
+    @EntityGraph(attributePaths = {"servicos"})
     Page<Barbeiro> findAll(Pageable pageable);
 
     List<Barbeiro> findByAtivoTrue();

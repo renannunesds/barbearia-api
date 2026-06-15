@@ -33,12 +33,10 @@ public class PagamentoService {
     public PagamentoResponseDTO processarPagamento(PagamentoRequestDTO dto) {
         Agendamento agendamento = agendamentoRepository.findByIdOrThrow(dto.idAgendamento());
 
-        // CORREÇÃO: Comparando Enum com Enum (sem aspas)
         if (StatusAgendamento.CANCELADO.equals(agendamento.getStatus())) {
             throw new PagamentoRecusadoException("Não é possível processar o pagamento de um agendamento cancelado!");
         }
 
-        // CORREÇÃO: Setando o Enum (sem aspas)
         agendamento.setStatus(StatusAgendamento.CONCLUIDO);
         agendamentoRepository.save(agendamento);
 

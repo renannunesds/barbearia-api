@@ -9,13 +9,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class AgendamentoTest {
 
     @Test
-    @DisplayName("Deve alterar o status para CONFIRMADO ao chamar confirmarAgendamento")
+    @DisplayName("Deve alterar o status para AGENDADO ao chamar confirmarAgendamento")
     void deveConfirmarAgendamento() {
         Agendamento agendamento = AgendamentoMother.padrao();
 
         agendamento.confirmarAgendamento();
 
-        assertEquals("CONFIRMADO", agendamento.getStatus());
+        assertEquals(StatusAgendamento.AGENDADO, agendamento.getStatus());
     }
 
     @Test
@@ -25,7 +25,7 @@ class AgendamentoTest {
 
         agendamento.cancelarAgendamento();
 
-        assertEquals("CANCELADO", agendamento.getStatus());
+        assertEquals(StatusAgendamento.CANCELADO, agendamento.getStatus());
     }
 
     @Test

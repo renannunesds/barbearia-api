@@ -29,8 +29,7 @@ public class Usuario implements Serializable {
     @Embedded
     protected SenhaVO senha;
 
-    public Usuario() {
-    }
+    public Usuario() {}
 
     public Usuario(Long id, String nome, EmailVO email, TelefoneVO telefone, SenhaVO senha) {
         this.id = id;
@@ -41,14 +40,13 @@ public class Usuario implements Serializable {
     }
 
     public Long getId() { return id; }
-    public String getNome() { return nome; }
-    public EmailVO getEmail() { return email; }
-    public TelefoneVO getTelefone() { return telefone; }
-    public SenhaVO getSenha() { return senha; }
-
     public void setId(Long id) { this.id = id; }
+    public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
+    public EmailVO getEmail() { return email; }
     public void setEmail(EmailVO email) { this.email = email; }
+    public TelefoneVO getTelefone() { return telefone; }
     public void setTelefone(TelefoneVO telefone) { this.telefone = telefone; }
+    public SenhaVO getSenha() { return senha; }
     public void setSenha(SenhaVO senha) { this.senha = senha; }
 }

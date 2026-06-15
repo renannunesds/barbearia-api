@@ -32,9 +32,8 @@ import org.springframework.web.bind.annotation.*;
 public class UsuarioController {
 
     private final UsuarioService service;
-    private final UsuarioModelAssembler assembler; // 1. Injetando seu assembler customizado
+    private final UsuarioModelAssembler assembler;
 
-    // Construtor atualizado recebendo o assembler
     public UsuarioController(UsuarioService service, UsuarioModelAssembler assembler) {
         this.service = service;
         this.assembler = assembler;
@@ -53,12 +52,11 @@ public class UsuarioController {
     @Cacheable(value = "usuariosCache", key = "{#pageable.pageNumber, #pageable.pageSize}")
     public ResponseEntity<PagedModel<EntityModel<UsuarioResponseDTO>>> buscarTodos(
             @ParameterObject @PageableDefault(size = 10, sort = "nome") Pageable pageable,
-            PagedResourcesAssembler<UsuarioResponseDTO> pagedResourcesAssembler) { // 2. Adicionado o gerenciador de páginas nativo do HATEOAS
+            PagedResourcesAssembler<UsuarioResponseDTO> pagedResourcesAssembler) {
 
         System.out.println("### CONSULTANDO USUÁRIOS NO BANCO DE DADOS... ###");
         Page<UsuarioResponseDTO> usuariosPage = service.findAll(pageable);
 
-        // 3. Transforma o Page comum no PagedModel inteligente com links "first", "next", etc.
         PagedModel<EntityModel<UsuarioResponseDTO>> pagedModel = pagedResourcesAssembler.toModel(usuariosPage, assembler);
 
         return ResponseEntity.ok(pagedModel);
@@ -76,7 +74,7 @@ public class UsuarioController {
     )
     public ResponseEntity<EntityModel<UsuarioResponseDTO>> buscarPorId(@PathVariable Long id) {
         UsuarioResponseDTO dto = service.findById(id);
-        // Envelopa a resposta gerando os links automáticos
+
         return ResponseEntity.ok(assembler.toModel(dto));
     }
 

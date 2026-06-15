@@ -9,7 +9,6 @@ import java.time.LocalDate;
 @Table(name = "pagamentos")
 public class Pagamento implements Serializable {
 
-    // 1. Padronização com o modelo do projeto
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -32,11 +31,9 @@ public class Pagamento implements Serializable {
     @JoinColumn(name = "agendamento_id", nullable = false)
     private Agendamento agendamento;
 
-    // Construtor padrão obrigatório para o JPA
     public Pagamento() {
     }
 
-    // 2. Construtor completo adicionado (Mantendo o padrão oficial do projeto)
     public Pagamento(Long idPagamento, BigDecimal valorTotal, LocalDate dataPagamento,
                      String formaPagamento, String status, Agendamento agendamento) {
         this.idPagamento = idPagamento;
@@ -47,7 +44,6 @@ public class Pagamento implements Serializable {
         this.agendamento = agendamento;
     }
 
-    // Getters e Setters
     public Long getIdPagamento() {
         return idPagamento;
     }
@@ -96,7 +92,6 @@ public class Pagamento implements Serializable {
         this.agendamento = agendamento;
     }
 
-    // 3. Métodos de negócio adicionados (Facilitará muito a lógica do seu PagamentoService)
     public void confirmarPagamento() {
         this.status = "PAGO";
     }

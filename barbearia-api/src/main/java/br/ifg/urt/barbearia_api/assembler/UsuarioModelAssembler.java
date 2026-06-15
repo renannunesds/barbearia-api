@@ -19,8 +19,6 @@ public class UsuarioModelAssembler
 
         // Link 'self': Aponta para a consulta por ID deste usuário específico
         model.add(linkTo(methodOn(UsuarioController.class).buscarPorId(dto.id())).withSelfRel());
-
-        // CORREÇÃO AQUI: Passamos dois nulos 'null, null' porque o seu controller espera 2 parâmetros agora!
         model.add(linkTo(methodOn(UsuarioController.class).buscarTodos(null, null)).withRel("todos-usuarios"));
 
         return model;

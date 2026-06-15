@@ -10,7 +10,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ItemVendaMapper {
 
-    // Buscando o ID e o Nome de dentro do objeto "item" da entidade ItemVenda
+
     @Mapping(source = "item.idItem", target = "idItem")
     @Mapping(source = "item.nome", target = "nomeItem")
     ItemVendaResponseDTO toResponseDTO(ItemVenda itemVenda);

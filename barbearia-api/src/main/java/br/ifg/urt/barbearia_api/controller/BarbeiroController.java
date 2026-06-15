@@ -34,7 +34,6 @@ public class BarbeiroController {
     private final BarbeiroService service;
     private final BarbeiroModelAssembler assembler; // 1. Injetando o seu Assembler customizado
 
-    // Atualizado o construtor para receber o assembler
     public BarbeiroController(BarbeiroService service, BarbeiroModelAssembler assembler) {
         this.service = service;
         this.assembler = assembler;
@@ -59,7 +58,6 @@ public class BarbeiroController {
         System.out.println("### CONSULTANDO BARBEIROS NO BANCO DE DADOS... ###");
         Page<BarbeiroResponseDTO> barbeirosPage = service.findAll(nome, pageable);
 
-        // 3. Converte a página comum em um PagedModel inteligente com links "first", "next", "prev", "last"
         PagedModel<EntityModel<BarbeiroResponseDTO>> pagedModel = pagedResourcesAssembler.toModel(barbeirosPage, assembler);
 
         return ResponseEntity.ok(pagedModel);
@@ -77,7 +75,7 @@ public class BarbeiroController {
     )
     public ResponseEntity<EntityModel<BarbeiroResponseDTO>> buscarPorId(@PathVariable Long id) {
         BarbeiroResponseDTO dto = service.findById(id);
-        // Envelopa o DTO aplicando os links configurados no assembler
+
         return ResponseEntity.ok(assembler.toModel(dto));
     }
 

@@ -25,26 +25,24 @@ public class Agendamento implements Serializable {
     @Column(nullable = false, length = 50)
     private StatusAgendamento status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "barbeiro_id", nullable = false)
     private Barbeiro barbeiro;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "servico_id", nullable = false)
     private Servico servico;
 
     @OneToOne(mappedBy = "agendamento", cascade = CascadeType.ALL)
     private Pagamento pagamento;
 
-    // Construtor padrão obrigatório para o JPA
     public Agendamento() {
     }
 
-    // Construtor completo
     public Agendamento(Long idAgendamento, LocalDate data, LocalTime horario, StatusAgendamento status,
                        Cliente cliente, Barbeiro barbeiro, Servico servico, Pagamento pagamento) {
         this.idAgendamento = idAgendamento;
@@ -118,7 +116,6 @@ public class Agendamento implements Serializable {
         return pagamento;
     }
 
-    // Método auxiliar de segurança
     public void setPagamento(Pagamento pagamento) {
         this.pagamento = pagamento;
         if (pagamento != null && pagamento.getAgendamento() != this) {
@@ -126,7 +123,6 @@ public class Agendamento implements Serializable {
         }
     }
 
-    // Métodos de negócio (MANTIDOS COMO VOCÊ TINHA)
     public void cancelarAgendamento() {
         this.status = StatusAgendamento.CANCELADO;
     }

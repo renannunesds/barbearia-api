@@ -24,7 +24,6 @@ public class ClienteService {
         this.mapper = mapper;
     }
 
-    // ATUALIZADO: Lógica de decisão de filtro por nome + paginação
     public Page<ClienteResponseDTO> findAll(String nome, Pageable pageable) {
         Page<Cliente> clientesPage;
 
