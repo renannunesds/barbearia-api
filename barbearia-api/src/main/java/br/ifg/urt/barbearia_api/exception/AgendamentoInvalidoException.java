@@ -5,8 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class AgendamentoInvalidoException extends RuntimeException {
-
-    public AgendamentoInvalidoException(String mensagem) {
-        super(mensagem);
+    public AgendamentoInvalidoException(String message) {
+        super(message);
     }
 }

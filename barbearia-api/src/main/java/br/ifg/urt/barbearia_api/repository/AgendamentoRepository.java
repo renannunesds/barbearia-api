@@ -13,6 +13,7 @@ import java.time.LocalTime;
 @Repository
 public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> {
 
+    // Adicionado apenas este método para o Service voltar a compilar
     default Agendamento findByIdOrThrow(Long id) {
         return findById(id)
                 .orElseThrow(() -> new RuntimeException("Agendamento não encontrado com ID: " + id));
