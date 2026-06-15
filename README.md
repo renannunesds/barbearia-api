@@ -66,6 +66,9 @@ Abaixo, a estrutura de classes, destacando as heranças e os *Value Objects* uti
 ```mermaid
 
 classDiagram
+    direction TB
+
+    %% Entidades de Usuário
     class Usuario {
         #Long id
         #String nome
@@ -78,13 +81,11 @@ classDiagram
     }
     class Barbeiro {
         -Boolean ativo
-        -List~Servico~ servicos
         +activarBarbeiro()
         +desativarBarbeiro()
     }
-    Usuario <|-- Cliente
-    Usuario <|-- Barbeiro
 
+    %% Entidades de Catálogo
     class Item {
         <<abstract>>
         -Long idItem
@@ -98,9 +99,8 @@ classDiagram
     class Servico {
         -Integer duracaoMinutos
     }
-    Item <|-- Produto
-    Item <|-- Servico
 
+    %% Entidades Operacionais
     class Agendamento {
         -Long idAgendamento
         -LocalDate data
@@ -109,7 +109,6 @@ classDiagram
         +confirmarAgendamento()
         +cancelarAgendamento()
     }
-
     class Pagamento {
         -Long idPagamento
         -BigDecimal valorTotal
@@ -119,7 +118,6 @@ classDiagram
         +confirmarPagamento()
         +estornarPagamento()
     }
-
     class ItemVenda {
         -Long idItemVenda
         -Integer quantidade
@@ -127,12 +125,19 @@ classDiagram
         -BigDecimal subtotal
     }
 
-    Agendamento "*" --> "1" Cliente
-    Agendamento "*" --> "1" Barbeiro
-    Agendamento "*" --> "1" Servico
-    Agendamento "1" -- "1" Pagamento
-    Barbeiro "*" -- "*" Servico
-    ItemVenda "*" --> "1" Item
+    %% Heranças
+    Usuario <|-- Cliente
+    Usuario <|-- Barbeiro
+    Item <|-- Produto
+    Item <|-- Servico
+
+    %% Relacionamentos
+    Cliente "1" -- "*" Agendamento : realiza
+    Barbeiro "1" -- "*" Agendamento : atende
+    Servico "1" -- "*" Agendamento : inclui
+    Agendamento "1" -- "1" Pagamento : possui
+    Barbeiro "*" -- "*" Servico : presta
+    Item "1" -- "*" ItemVenda : composto por
 
 ```
 
@@ -144,19 +149,23 @@ A modelagem do banco de dados relacional gerada pelo sistema:
 ```mermaid
 
 erDiagram
-    USUARIO ||--o| CLIENTE : "é um (Herança)"
-    USUARIO ||--o| BARBEIRO : "é um (Herança)"
-    ITEM ||--o| PRODUTO : "é um (Herança)"
-    ITEM ||--o| SERVICO : "é um (Herança)"
+    %% Heranças no Banco (Estratégia JOINED)
+    USUARIO ||--o| CLIENTE : is_a
+    USUARIO ||--o| BARBEIRO : is_a
+    ITEM ||--o| PRODUTO : is_a
+    ITEM ||--o| SERVICO : is_a
 
-    CLIENTE ||--o{ AGENDAMENTO : "realiza"
-    BARBEIRO ||--o{ AGENDAMENTO : "atende"
-    SERVICO ||--o{ AGENDAMENTO : "agendado em"
-    AGENDAMENTO ||--|| PAGAMENTO : "possui"
+    %% Relacionamentos do Agendamento (O coração do sistema)
+    CLIENTE ||--o{ AGENDAMENTO : realiza
+    BARBEIRO ||--o{ AGENDAMENTO : atende
+    SERVICO ||--o{ AGENDAMENTO : agendado_em
+    AGENDAMENTO ||--|| PAGAMENTO : gera
 
-    BARBEIRO }|--|{ SERVICO : "presta"
-    ITEM ||--o{ ITEM_VENDA : "composto por"
+    %% Outros Relacionamentos
+    BARBEIRO }|--|{ SERVICO : presta
+    ITEM ||--o{ ITEM_VENDA : possui
 
+    %% Definição de Colunas
     USUARIO {
         Long id PK
         String nome
@@ -170,18 +179,6 @@ erDiagram
     BARBEIRO {
         Boolean ativo
     }
-    ITEM {
-        Long idItem PK
-        String nome
-        String descricao
-        BigDecimal valor
-    }
-    PRODUTO {
-        Integer quantidadeEstoque
-    }
-    SERVICO {
-        Integer duracaoMinutos
-    }
     AGENDAMENTO {
         Long idAgendamento PK
         LocalDate data
@@ -194,6 +191,18 @@ erDiagram
         LocalDate dataPagamento
         String formaPagamento
         String status
+    }
+    ITEM {
+        Long idItem PK
+        String nome
+        String descricao
+        BigDecimal valor
+    }
+    PRODUTO {
+        Integer quantidadeEstoque
+    }
+    SERVICO {
+        Integer duracaoMinutos
     }
     ITEM_VENDA {
         Long idItemVenda PK
