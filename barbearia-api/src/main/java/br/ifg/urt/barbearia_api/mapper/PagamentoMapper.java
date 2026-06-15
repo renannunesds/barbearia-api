@@ -11,6 +11,7 @@ public interface PagamentoMapper {
 
     @Mapping(target = "idPagamento", ignore = true)
     @Mapping(target = "agendamento", ignore = true)
+    @Mapping(target = "status", source = "status")
     Pagamento requestToEntity(PagamentoRequestDTO dto);
 
     @Mapping(source = "agendamento.idAgendamento", target = "idAgendamento")

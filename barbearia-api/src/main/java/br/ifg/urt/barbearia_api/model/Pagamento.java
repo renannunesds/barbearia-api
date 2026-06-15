@@ -24,10 +24,11 @@ public class Pagamento implements Serializable {
     @Column(nullable = false, length = 50)
     private String formaPagamento;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private String status;
+    private StatusPagamento status;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agendamento_id", nullable = false)
     private Agendamento agendamento;
 
@@ -35,7 +36,7 @@ public class Pagamento implements Serializable {
     }
 
     public Pagamento(Long idPagamento, BigDecimal valorTotal, LocalDate dataPagamento,
-                     String formaPagamento, String status, Agendamento agendamento) {
+                     String formaPagamento, StatusPagamento status, Agendamento agendamento) {
         this.idPagamento = idPagamento;
         this.valorTotal = valorTotal;
         this.dataPagamento = dataPagamento;
@@ -76,11 +77,11 @@ public class Pagamento implements Serializable {
         this.formaPagamento = formaPagamento;
     }
 
-    public String getStatus() {
+    public StatusPagamento getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(StatusPagamento status) {
         this.status = status;
     }
 
@@ -93,10 +94,10 @@ public class Pagamento implements Serializable {
     }
 
     public void confirmarPagamento() {
-        this.status = "PAGO";
+        this.status = StatusPagamento.PAGO;
     }
 
     public void estornarPagamento() {
-        this.status = "ESTORNADO";
+        this.status = StatusPagamento.ESTORNADO;
     }
 }

@@ -16,7 +16,7 @@ import java.util.Optional;
 public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> {
 
     @Override
-    @EntityGraph(attributePaths = {"barbeiro", "cliente", "servicos"})
+    @EntityGraph(attributePaths = {"barbeiro", "cliente", "servico"})
     Optional<Agendamento> findById(Long id);
 
     default Agendamento findByIdOrThrow(Long id) {

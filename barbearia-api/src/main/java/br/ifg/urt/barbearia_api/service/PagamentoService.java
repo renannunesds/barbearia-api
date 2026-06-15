@@ -6,7 +6,7 @@ import br.ifg.urt.barbearia_api.exception.PagamentoRecusadoException;
 import br.ifg.urt.barbearia_api.mapper.PagamentoMapper;
 import br.ifg.urt.barbearia_api.model.Agendamento;
 import br.ifg.urt.barbearia_api.model.Pagamento;
-import br.ifg.urt.barbearia_api.model.StatusAgendamento; // Import necessário
+import br.ifg.urt.barbearia_api.model.StatusAgendamento;
 import br.ifg.urt.barbearia_api.repository.AgendamentoRepository;
 import br.ifg.urt.barbearia_api.repository.PagamentoRepository;
 import org.springframework.data.domain.Page;
@@ -41,18 +41,22 @@ public class PagamentoService {
         agendamentoRepository.save(agendamento);
 
         Pagamento pagamento = pagamentoMapper.requestToEntity(dto);
+
         pagamento.setAgendamento(agendamento);
+
         pagamento.confirmarPagamento();
 
         Pagamento salvo = pagamentoRepository.save(pagamento);
         return pagamentoMapper.entityToResponse(salvo);
     }
 
+    @Transactional(readOnly = true)
     public Page<PagamentoResponseDTO> listarTodos(Pageable pageable) {
         return pagamentoRepository.findAll(pageable)
                 .map(pagamentoMapper::entityToResponse);
     }
 
+    @Transactional(readOnly = true)
     public PagamentoResponseDTO buscarPorId(Long id) {
         Pagamento pagamento = pagamentoRepository.findByIdOrThrow(id);
         return pagamentoMapper.entityToResponse(pagamento);

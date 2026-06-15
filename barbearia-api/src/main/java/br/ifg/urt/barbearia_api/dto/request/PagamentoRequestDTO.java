@@ -1,5 +1,6 @@
 package br.ifg.urt.barbearia_api.dto.request;
 
+import br.ifg.urt.barbearia_api.model.StatusPagamento;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -15,9 +16,11 @@ public record PagamentoRequestDTO(
         @NotBlank(message = "A forma de pagamento é obrigatória")
         String formaPagamento,
 
-        @NotBlank(message = "O status do pagamento é obrigatório")
-        String status,
+        @NotNull(message = "O status do pagamento é obrigatório")
+        StatusPagamento status,
 
         @NotNull(message = "O ID do agendamento é obrigatório")
         Long idAgendamento
-) {}
+) {
+
+}
