@@ -63,6 +63,8 @@ Abaixo, a estrutura de classes, destacando as heranças e os *Value Objects* uti
 
 <img width="489" alt="Diagrama de Classes" src="https://github.com/user-attachments/assets/e8791744-6e08-4986-b632-a9a7bc3305d3" />
 
+```mermaid
+
 classDiagram
     class Usuario {
         #Long id
@@ -132,10 +134,14 @@ classDiagram
     Barbeiro "*" -- "*" Servico
     ItemVenda "*" --> "1" Item
 
+```
+
 ### Diagrama Entidade-Relacionamento (DER)
 A modelagem do banco de dados relacional gerada pelo sistema:
 
 <img width="840" alt="DER" src="https://github.com/user-attachments/assets/8ed5aaba-f4b0-48c7-8427-b54e435fe392" />
+
+```mermaid
 
 erDiagram
     USUARIO ||--o| CLIENTE : "é um (Herança)"
@@ -195,6 +201,8 @@ erDiagram
         BigDecimal valorUnitario
         BigDecimal subtotal
     }
+
+```
 
 ---
 
