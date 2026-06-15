@@ -10,19 +10,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class ItemVendaModelAssembler
-        implements RepresentationModelAssembler<ItemVendaResponseDTO, EntityModel<ItemVendaResponseDTO>> {
-
+public class ItemVendaModelAssembler implements RepresentationModelAssembler<ItemVendaResponseDTO, EntityModel<ItemVendaResponseDTO>> {
     @Override
     public EntityModel<ItemVendaResponseDTO> toModel(ItemVendaResponseDTO dto) {
-        EntityModel<ItemVendaResponseDTO> model = EntityModel.of(dto);
-
-        // Link 'self': Aponta para a rota individual do item de venda específico
-        model.add(linkTo(methodOn(ItemVendaController.class).buscarPorId(dto.idItemVenda())).withSelfRel());
-
-        // Link relacional: Aponta para a listagem de itens gravados
-        model.add(linkTo(methodOn(ItemVendaController.class).listar()).withRel("todos-itens-venda"));
-
-        return model;
+        return EntityModel.of(dto,
+                // 🔥 CORRIGIDO: Trocado de dto.id() para dto.idItemVenda()
+                linkTo(methodOn(ItemVendaController.class).buscarPorId(dto.idItemVenda())).withSelfRel(),
+                linkTo(methodOn(ItemVendaController.class).listar()).withRel("itens-venda"));
     }
 }

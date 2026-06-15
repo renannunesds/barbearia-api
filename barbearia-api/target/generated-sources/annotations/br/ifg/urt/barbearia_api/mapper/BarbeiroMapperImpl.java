@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-14T14:02:52-0300",
+    date = "2026-06-14T20:54:14-0300",
     comments = "version: 1.6.3, compiler: javac, environment: Java 21.0.11 (Microsoft)"
 )
 @Component
@@ -36,9 +36,9 @@ public class BarbeiroMapperImpl implements BarbeiroMapper {
         nome = barbeiro.getNome();
         ativo = barbeiro.getAtivo();
 
-        List<String> especialidades = barbeiro.getEspecialidades() != null ? barbeiro.getEspecialidades().stream().map(br.ifg.urt.barbearia_api.model.Especialidade::getNome).collect(java.util.stream.Collectors.toList()) : null;
+        List<String> servicos = barbeiro.getServicos() != null ? barbeiro.getServicos().stream().map(br.ifg.urt.barbearia_api.model.Servico::getNome).collect(java.util.stream.Collectors.toList()) : null;
 
-        BarbeiroResponseDTO barbeiroResponseDTO = new BarbeiroResponseDTO( id, nome, email, telefone, especialidades, ativo );
+        BarbeiroResponseDTO barbeiroResponseDTO = new BarbeiroResponseDTO( id, nome, email, telefone, servicos, ativo );
 
         return barbeiroResponseDTO;
     }
