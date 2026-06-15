@@ -1,5 +1,6 @@
 package br.ifg.urt.barbearia_api.dto.response;
 
+import br.ifg.urt.barbearia_api.model.StatusAgendamento;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -16,8 +17,8 @@ public record AgendamentoResponseDTO(
         @Schema(description = "Horário agendado para o serviço", example = "14:30")
         LocalTime horario,
 
-        @Schema(description = "Status atual do agendamento", example = "CONFIRMADO")
-        String status,
+        @Schema(description = "Status atual do agendamento", example = "AGENDADO")
+        StatusAgendamento status,
 
         @Schema(description = "Nome do cliente que realizou o agendamento", example = "João Silva")
         String nomeCliente,

@@ -9,10 +9,9 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface AgendamentoMapper {
 
-    // Removemos os ignores dos objetos, pois vamos preenchê-los manualmente no Service
     @Mapping(target = "idAgendamento", ignore = true)
-    @Mapping(target = "status", ignore = true)
-    @Mapping(target = "cliente", ignore = true) // Deixamos ignorar porque o Service faz o set
+    @Mapping(target = "status", ignore = true) // Continua ignorado porque você define no Service
+    @Mapping(target = "cliente", ignore = true)
     @Mapping(target = "barbeiro", ignore = true)
     @Mapping(target = "servico", ignore = true)
     @Mapping(target = "pagamento", ignore = true)

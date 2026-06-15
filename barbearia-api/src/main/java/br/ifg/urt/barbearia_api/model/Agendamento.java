@@ -9,7 +9,6 @@ import java.time.LocalTime;
 @Table(name = "agendamentos")
 public class Agendamento implements Serializable {
 
-    // 1. Padronização com o modelo do seu colega
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -22,8 +21,9 @@ public class Agendamento implements Serializable {
     @Column(nullable = false)
     private LocalTime horario;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private String status;
+    private StatusAgendamento status;
 
     @ManyToOne
     @JoinColumn(name = "cliente_id", nullable = false)
@@ -44,8 +44,8 @@ public class Agendamento implements Serializable {
     public Agendamento() {
     }
 
-    // 2. Construtor completo adicionado (Igual ao padrão do seu colega)
-    public Agendamento(Long idAgendamento, LocalDate data, LocalTime horario, String status,
+    // Construtor completo
+    public Agendamento(Long idAgendamento, LocalDate data, LocalTime horario, StatusAgendamento status,
                        Cliente cliente, Barbeiro barbeiro, Servico servico, Pagamento pagamento) {
         this.idAgendamento = idAgendamento;
         this.data = data;
@@ -82,11 +82,11 @@ public class Agendamento implements Serializable {
         this.horario = horario;
     }
 
-    public String getStatus() {
+    public StatusAgendamento getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(StatusAgendamento status) {
         this.status = status;
     }
 
@@ -118,7 +118,7 @@ public class Agendamento implements Serializable {
         return pagamento;
     }
 
-    // 3. Método auxiliar de segurança (Evita que o JPA duplique registros ou crie dados órfãos)
+    // Método auxiliar de segurança
     public void setPagamento(Pagamento pagamento) {
         this.pagamento = pagamento;
         if (pagamento != null && pagamento.getAgendamento() != this) {
@@ -126,12 +126,12 @@ public class Agendamento implements Serializable {
         }
     }
 
-    // 4. Métodos de negócio adicionados (Seguindo as boas práticas do seu colega)
+    // Métodos de negócio (MANTIDOS COMO VOCÊ TINHA)
     public void cancelarAgendamento() {
-        this.status = "CANCELADO";
+        this.status = StatusAgendamento.CANCELADO;
     }
 
     public void confirmarAgendamento() {
-        this.status = "CONFIRMADO";
+        this.status = StatusAgendamento.CONCLUIDO;
     }
 }

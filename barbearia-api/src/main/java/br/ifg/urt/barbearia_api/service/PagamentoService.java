@@ -2,10 +2,11 @@ package br.ifg.urt.barbearia_api.service;
 
 import br.ifg.urt.barbearia_api.dto.request.PagamentoRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.PagamentoResponseDTO;
-import br.ifg.urt.barbearia_api.exception.PagamentoRecusadoException; // <--- Import da sua nova exceção
+import br.ifg.urt.barbearia_api.exception.PagamentoRecusadoException;
 import br.ifg.urt.barbearia_api.mapper.PagamentoMapper;
 import br.ifg.urt.barbearia_api.model.Agendamento;
 import br.ifg.urt.barbearia_api.model.Pagamento;
+import br.ifg.urt.barbearia_api.model.StatusAgendamento; // Import necessário
 import br.ifg.urt.barbearia_api.repository.AgendamentoRepository;
 import br.ifg.urt.barbearia_api.repository.PagamentoRepository;
 import org.springframework.data.domain.Page;
@@ -32,12 +33,13 @@ public class PagamentoService {
     public PagamentoResponseDTO processarPagamento(PagamentoRequestDTO dto) {
         Agendamento agendamento = agendamentoRepository.findByIdOrThrow(dto.idAgendamento());
 
-        // Regra de Negócio: Não permite pagar agendamento CANCELADO
-        if ("CANCELADO".equals(agendamento.getStatus())) {
+        // CORREÇÃO: Comparando Enum com Enum (sem aspas)
+        if (StatusAgendamento.CANCELADO.equals(agendamento.getStatus())) {
             throw new PagamentoRecusadoException("Não é possível processar o pagamento de um agendamento cancelado!");
         }
 
-        agendamento.setStatus("CONCLUIDO");
+        // CORREÇÃO: Setando o Enum (sem aspas)
+        agendamento.setStatus(StatusAgendamento.CONCLUIDO);
         agendamentoRepository.save(agendamento);
 
         Pagamento pagamento = pagamentoMapper.requestToEntity(dto);

@@ -2,12 +2,13 @@ package br.ifg.urt.barbearia_api.service;
 
 import br.ifg.urt.barbearia_api.dto.request.AgendamentoRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.AgendamentoResponseDTO;
-import br.ifg.urt.barbearia_api.exception.AgendamentoInvalidoException; // <--- Import da sua nova exceção
+import br.ifg.urt.barbearia_api.exception.AgendamentoInvalidoException;
 import br.ifg.urt.barbearia_api.mapper.AgendamentoMapper;
 import br.ifg.urt.barbearia_api.model.Agendamento;
 import br.ifg.urt.barbearia_api.model.Barbeiro;
 import br.ifg.urt.barbearia_api.model.Cliente;
 import br.ifg.urt.barbearia_api.model.Servico;
+import br.ifg.urt.barbearia_api.model.StatusAgendamento; // Import do Enum
 import br.ifg.urt.barbearia_api.repository.AgendamentoRepository;
 import br.ifg.urt.barbearia_api.repository.BarbeiroRepository;
 import br.ifg.urt.barbearia_api.repository.ClienteRepository;
@@ -48,7 +49,6 @@ public class AgendamentoService {
                 barbeiro, dto.data(), dto.horario());
 
         if (barbeiroOcupado) {
-            // Alterado de RuntimeException para sua exceção customizada
             throw new AgendamentoInvalidoException("Este barbeiro já possui um agendamento neste horário!");
         }
 
@@ -56,7 +56,8 @@ public class AgendamentoService {
         agendamento.setBarbeiro(barbeiro);
         agendamento.setCliente(cliente);
         agendamento.setServico(servico);
-        agendamento.setStatus("PENDENTE");
+        // Utilizando o Enum em vez da String
+        agendamento.setStatus(StatusAgendamento.AGENDADO);
 
         Agendamento salvo = agendamentoRepository.save(agendamento);
         return agendamentoMapper.entityToResponse(salvo);
@@ -101,7 +102,6 @@ public class AgendamentoService {
                     agendamentoExistente.getBarbeiro(), dto.data(), dto.horario()
             );
             if (horarioOcupado) {
-                // Alterado de RuntimeException para sua exceção customizada
                 throw new AgendamentoInvalidoException("Este barbeiro já possui um agendamento neste novo horário!");
             }
         }
