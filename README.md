@@ -63,10 +63,146 @@ Abaixo, a estrutura de classes, destacando as heranças e os *Value Objects* uti
 
 <img width="489" alt="Diagrama de Classes" src="https://github.com/user-attachments/assets/e8791744-6e08-4986-b632-a9a7bc3305d3" />
 
+```mermaid
+
+classDiagram
+    class Usuario {
+        #Long id
+        #String nome
+        #EmailVO email
+        #TelefoneVO telefone
+        #SenhaVO senha
+    }
+    class Cliente {
+        -String observacoes
+    }
+    class Barbeiro {
+        -Boolean ativo
+        -List~Servico~ servicos
+        +activarBarbeiro()
+        +desativarBarbeiro()
+    }
+    Usuario <|-- Cliente
+    Usuario <|-- Barbeiro
+
+    class Item {
+        <<abstract>>
+        -Long idItem
+        -String nome
+        -String descricao
+        -BigDecimal valor
+    }
+    class Produto {
+        -Integer quantidadeEstoque
+    }
+    class Servico {
+        -Integer duracaoMinutos
+    }
+    Item <|-- Produto
+    Item <|-- Servico
+
+    class Agendamento {
+        -Long idAgendamento
+        -LocalDate data
+        -LocalTime horario
+        -StatusAgendamento status
+        +confirmarAgendamento()
+        +cancelarAgendamento()
+    }
+
+    class Pagamento {
+        -Long idPagamento
+        -BigDecimal valorTotal
+        -LocalDate dataPagamento
+        -String formaPagamento
+        -String status
+        +confirmarPagamento()
+        +estornarPagamento()
+    }
+
+    class ItemVenda {
+        -Long idItemVenda
+        -Integer quantidade
+        -BigDecimal valorUnitario
+        -BigDecimal subtotal
+    }
+
+    Agendamento "*" --> "1" Cliente
+    Agendamento "*" --> "1" Barbeiro
+    Agendamento "*" --> "1" Servico
+    Agendamento "1" -- "1" Pagamento
+    Barbeiro "*" -- "*" Servico
+    ItemVenda "*" --> "1" Item
+
+```
+
 ### Diagrama Entidade-Relacionamento (DER)
 A modelagem do banco de dados relacional gerada pelo sistema:
 
 <img width="840" alt="DER" src="https://github.com/user-attachments/assets/8ed5aaba-f4b0-48c7-8427-b54e435fe392" />
+
+```mermaid
+
+erDiagram
+    USUARIO ||--o| CLIENTE : "é um (Herança)"
+    USUARIO ||--o| BARBEIRO : "é um (Herança)"
+    ITEM ||--o| PRODUTO : "é um (Herança)"
+    ITEM ||--o| SERVICO : "é um (Herança)"
+
+    CLIENTE ||--o{ AGENDAMENTO : "realiza"
+    BARBEIRO ||--o{ AGENDAMENTO : "atende"
+    SERVICO ||--o{ AGENDAMENTO : "agendado em"
+    AGENDAMENTO ||--|| PAGAMENTO : "possui"
+
+    BARBEIRO }|--|{ SERVICO : "presta"
+    ITEM ||--o{ ITEM_VENDA : "composto por"
+
+    USUARIO {
+        Long id PK
+        String nome
+        String email
+        String telefone
+        String senha
+    }
+    CLIENTE {
+        String observacoes
+    }
+    BARBEIRO {
+        Boolean ativo
+    }
+    ITEM {
+        Long idItem PK
+        String nome
+        String descricao
+        BigDecimal valor
+    }
+    PRODUTO {
+        Integer quantidadeEstoque
+    }
+    SERVICO {
+        Integer duracaoMinutos
+    }
+    AGENDAMENTO {
+        Long idAgendamento PK
+        LocalDate data
+        LocalTime horario
+        String status
+    }
+    PAGAMENTO {
+        Long idPagamento PK
+        BigDecimal valorTotal
+        LocalDate dataPagamento
+        String formaPagamento
+        String status
+    }
+    ITEM_VENDA {
+        Long idItemVenda PK
+        Integer quantidade
+        BigDecimal valorUnitario
+        BigDecimal subtotal
+    }
+
+```
 
 ---
 
