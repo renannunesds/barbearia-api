@@ -42,7 +42,8 @@ public class AgendamentoController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Criar novo agendamento", responses = {
-            @ApiResponse(description = "Criado com sucesso", responseCode = "201", content = @Content(schema = @Schema(implementation = AgendamentoResponseDTO.class)))
+            @ApiResponse(description = "Criado com sucesso", responseCode = "201", content = @Content(schema = @Schema(implementation = AgendamentoResponseDTO.class))),
+            @ApiResponse(description = "Horário indisponível ou dados inválidos", responseCode = "400") // <--- Avisa o Swagger do erro 400
     })
     @CacheEvict(value = "agendamentosCache", allEntries = true)
     public ResponseEntity<EntityModel<AgendamentoResponseDTO>> criar(@RequestBody @Valid AgendamentoRequestDTO dto) {

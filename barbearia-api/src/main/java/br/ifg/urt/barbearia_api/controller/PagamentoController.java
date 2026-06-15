@@ -4,6 +4,10 @@ import br.ifg.urt.barbearia_api.assembler.PagamentoModelAssembler;
 import br.ifg.urt.barbearia_api.dto.request.PagamentoRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.PagamentoResponseDTO;
 import br.ifg.urt.barbearia_api.service.PagamentoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
@@ -37,6 +41,10 @@ public class PagamentoController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Processar pagamento", responses = {
+            @ApiResponse(description = "Pagamento processado com sucesso", responseCode = "201", content = @Content(schema = @Schema(implementation = PagamentoResponseDTO.class))),
+            @ApiResponse(description = "Regra de negócio violada / Pagamento recusado", responseCode = "422") // <--- Avisa o Swagger do erro 422
+    })
     @CacheEvict(value = "pagamentosCache", allEntries = true)
     public ResponseEntity<EntityModel<PagamentoResponseDTO>> processar(@RequestBody @Valid PagamentoRequestDTO dto) {
         PagamentoResponseDTO response = pagamentoService.processarPagamento(dto);

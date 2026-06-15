@@ -2,6 +2,7 @@ package br.ifg.urt.barbearia_api.service;
 
 import br.ifg.urt.barbearia_api.dto.request.AgendamentoRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.AgendamentoResponseDTO;
+import br.ifg.urt.barbearia_api.exception.AgendamentoInvalidoException; // <--- Import da sua nova exceção
 import br.ifg.urt.barbearia_api.mapper.AgendamentoMapper;
 import br.ifg.urt.barbearia_api.model.Agendamento;
 import br.ifg.urt.barbearia_api.model.Barbeiro;
@@ -39,7 +40,6 @@ public class AgendamentoService {
 
     @Transactional
     public AgendamentoResponseDTO criarAgendamento(AgendamentoRequestDTO dto) {
-        // Usando o padrão de buscar por ID ou lançar exceção (assumindo que adicionou findByIdOrThrow nos repos)
         Barbeiro barbeiro = barbeiroRepository.findByIdOrThrow(dto.idBarbeiro());
         Cliente cliente = clienteRepository.findByIdOrThrow(dto.idCliente());
         Servico servico = servicoRepository.findByIdOrThrow(dto.idServico());
@@ -48,7 +48,8 @@ public class AgendamentoService {
                 barbeiro, dto.data(), dto.horario());
 
         if (barbeiroOcupado) {
-            throw new RuntimeException("Este barbeiro já possui um agendamento neste horário!");
+            // Alterado de RuntimeException para sua exceção customizada
+            throw new AgendamentoInvalidoException("Este barbeiro já possui um agendamento neste horário!");
         }
 
         Agendamento agendamento = agendamentoMapper.requestToEntity(dto);
@@ -100,7 +101,8 @@ public class AgendamentoService {
                     agendamentoExistente.getBarbeiro(), dto.data(), dto.horario()
             );
             if (horarioOcupado) {
-                throw new RuntimeException("Este barbeiro já possui um agendamento neste novo horário!");
+                // Alterado de RuntimeException para sua exceção customizada
+                throw new AgendamentoInvalidoException("Este barbeiro já possui um agendamento neste novo horário!");
             }
         }
 

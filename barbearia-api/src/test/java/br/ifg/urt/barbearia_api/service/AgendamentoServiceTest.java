@@ -2,6 +2,7 @@ package br.ifg.urt.barbearia_api.service;
 
 import br.ifg.urt.barbearia_api.dto.request.AgendamentoRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.AgendamentoResponseDTO;
+import br.ifg.urt.barbearia_api.exception.AgendamentoInvalidoException; // <--- Import da sua nova exceção
 import br.ifg.urt.barbearia_api.mapper.AgendamentoMapper;
 import br.ifg.urt.barbearia_api.model.*;
 import br.ifg.urt.barbearia_api.mother.AgendamentoMother;
@@ -58,7 +59,9 @@ class AgendamentoServiceTest {
         when(barbeiroRepository.findByIdOrThrow(any())).thenReturn(new Barbeiro());
         when(agendamentoRepository.existsByBarbeiroAndDataAndHorario(any(), any(), any())).thenReturn(true);
 
-        assertThrows(RuntimeException.class, () -> agendamentoService.criarAgendamento(dto));
+        // MUDADO AQUI: Agora valida se o método joga a AgendamentoInvalidoException de verdade!
+        assertThrows(AgendamentoInvalidoException.class, () -> agendamentoService.criarAgendamento(dto));
+
         verify(agendamentoRepository, never()).save(any());
     }
 }

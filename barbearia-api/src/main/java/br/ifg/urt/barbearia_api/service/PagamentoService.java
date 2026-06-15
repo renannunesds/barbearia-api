@@ -2,6 +2,7 @@ package br.ifg.urt.barbearia_api.service;
 
 import br.ifg.urt.barbearia_api.dto.request.PagamentoRequestDTO;
 import br.ifg.urt.barbearia_api.dto.response.PagamentoResponseDTO;
+import br.ifg.urt.barbearia_api.exception.PagamentoRecusadoException; // <--- Import da sua nova exceção
 import br.ifg.urt.barbearia_api.mapper.PagamentoMapper;
 import br.ifg.urt.barbearia_api.model.Agendamento;
 import br.ifg.urt.barbearia_api.model.Pagamento;
@@ -29,8 +30,12 @@ public class PagamentoService {
 
     @Transactional
     public PagamentoResponseDTO processarPagamento(PagamentoRequestDTO dto) {
-        // Agendamento usa o método padrão findByIdOrThrow também (se implementado no AgendamentoRepository)
         Agendamento agendamento = agendamentoRepository.findByIdOrThrow(dto.idAgendamento());
+
+        // Regra de Negócio: Não permite pagar agendamento CANCELADO
+        if ("CANCELADO".equals(agendamento.getStatus())) {
+            throw new PagamentoRecusadoException("Não é possível processar o pagamento de um agendamento cancelado!");
+        }
 
         agendamento.setStatus("CONCLUIDO");
         agendamentoRepository.save(agendamento);
