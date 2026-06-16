@@ -133,3 +133,6 @@ O sistema valida o conflito de horários e, em caso de sucesso, retorna o objeto
     }
   }
 }
+```
+7. Conclusão
+O desenvolvimento da BarberWeb API permitiu a consolidação prática dos conceitos avançados da programação backend em Java. A implementação da arquitetura em camadas aliada à separação estrita de dados através de DTOs e Value Objects garantiu um sistema seguro e coeso. Recursos modernos, como validações elegantes de banco de dados via Herança no JPA, otimização de requisições por Cacheamento e navegação inteligente através do HATEOAS, resultaram em uma aplicação robusta, escalável e perfeitamente alinhada aos padrões e exigências do mercado para aplicações corporativas.
