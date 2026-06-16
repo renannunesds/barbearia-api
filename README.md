@@ -67,7 +67,8 @@ Abaixo, a estrutura de classes, destacando as heranças e os *Value Objects* uti
 ### Diagrama Entidade-Relacionamento (DER)
 A modelagem do banco de dados relacional gerada pelo sistema:
 
-<img width="1071" height="1321" alt="Diagrama sem nome (3) drawio (3)" src="https://github.com/user-attachments/assets/a8876f20-c63b-402a-9662-b8a27e6c9614" />
+<img width="1282" height="1421" alt="Diagrama sem nome (3) drawio (4)" src="https://github.com/user-attachments/assets/1df8889a-e056-4bf1-a45b-6116f4fe7106" />
+
 
 
 
