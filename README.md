@@ -61,85 +61,8 @@ As principais funcionalidades entregues pela API incluem:
 ### Diagrama de Classes
 Abaixo, a estrutura de classes, destacando as heranças e os *Value Objects* utilizados:
 
-<img width="489" alt="Diagrama de Classes" src="https://github.com/user-attachments/assets/e8791744-6e08-4986-b632-a9a7bc3305d3" />
+<img width="2205" height="1091" alt="Diagrama sem nome drawio (21)" src="https://github.com/user-attachments/assets/1f17c19f-f1a6-4f89-9e16-8e13f69af785" />
 
-```mermaid
-
-classDiagram
-    direction TB
-
-    %% Entidades de Usuário
-    class Usuario {
-        #Long id
-        #String nome
-        #EmailVO email
-        #TelefoneVO telefone
-        #SenhaVO senha
-    }
-    class Cliente {
-        -String observacoes
-    }
-    class Barbeiro {
-        -Boolean ativo
-        +activarBarbeiro()
-        +desativarBarbeiro()
-    }
-
-    %% Entidades de Catálogo
-    class Item {
-        <<abstract>>
-        -Long idItem
-        -String nome
-        -String descricao
-        -BigDecimal valor
-    }
-    class Produto {
-        -Integer quantidadeEstoque
-    }
-    class Servico {
-        -Integer duracaoMinutos
-    }
-
-    %% Entidades Operacionais
-    class Agendamento {
-        -Long idAgendamento
-        -LocalDate data
-        -LocalTime horario
-        -StatusAgendamento status
-        +confirmarAgendamento()
-        +cancelarAgendamento()
-    }
-    class Pagamento {
-        -Long idPagamento
-        -BigDecimal valorTotal
-        -LocalDate dataPagamento
-        -String formaPagamento
-        -String status
-        +confirmarPagamento()
-        +estornarPagamento()
-    }
-    class ItemVenda {
-        -Long idItemVenda
-        -Integer quantidade
-        -BigDecimal valorUnitario
-        -BigDecimal subtotal
-    }
-
-    %% Heranças
-    Usuario <|-- Cliente
-    Usuario <|-- Barbeiro
-    Item <|-- Produto
-    Item <|-- Servico
-
-    %% Relacionamentos
-    Cliente "1" -- "*" Agendamento : realiza
-    Barbeiro "1" -- "*" Agendamento : atende
-    Servico "1" -- "*" Agendamento : inclui
-    Agendamento "1" -- "1" Pagamento : possui
-    Barbeiro "*" -- "*" Servico : presta
-    Item "1" -- "*" ItemVenda : composto por
-
-```
 
 ### Diagrama Entidade-Relacionamento (DER)
 A modelagem do banco de dados relacional gerada pelo sistema:
