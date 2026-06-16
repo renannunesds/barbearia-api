@@ -67,74 +67,8 @@ Abaixo, a estrutura de classes, destacando as heranças e os *Value Objects* uti
 ### Diagrama Entidade-Relacionamento (DER)
 A modelagem do banco de dados relacional gerada pelo sistema:
 
-<img width="840" alt="DER" src="https://github.com/user-attachments/assets/8ed5aaba-f4b0-48c7-8427-b54e435fe392" />
+<img width="1118" height="1321" alt="Diagrama sem nome (3) drawio (2)" src="https://github.com/user-attachments/assets/1655924a-8e70-4fea-bd2b-886e3d91bde2" />
 
-```mermaid
-
-erDiagram
-    %% Heranças no Banco (Estratégia JOINED)
-    USUARIO ||--o| CLIENTE : is_a
-    USUARIO ||--o| BARBEIRO : is_a
-    ITEM ||--o| PRODUTO : is_a
-    ITEM ||--o| SERVICO : is_a
-
-    %% Relacionamentos do Agendamento (O coração do sistema)
-    CLIENTE ||--o{ AGENDAMENTO : realiza
-    BARBEIRO ||--o{ AGENDAMENTO : atende
-    SERVICO ||--o{ AGENDAMENTO : agendado_em
-    AGENDAMENTO ||--|| PAGAMENTO : gera
-
-    %% Outros Relacionamentos
-    BARBEIRO }|--|{ SERVICO : presta
-    ITEM ||--o{ ITEM_VENDA : possui
-
-    %% Definição de Colunas
-    USUARIO {
-        Long id PK
-        String nome
-        String email
-        String telefone
-        String senha
-    }
-    CLIENTE {
-        String observacoes
-    }
-    BARBEIRO {
-        Boolean ativo
-    }
-    AGENDAMENTO {
-        Long idAgendamento PK
-        LocalDate data
-        LocalTime horario
-        String status
-    }
-    PAGAMENTO {
-        Long idPagamento PK
-        BigDecimal valorTotal
-        LocalDate dataPagamento
-        String formaPagamento
-        String status
-    }
-    ITEM {
-        Long idItem PK
-        String nome
-        String descricao
-        BigDecimal valor
-    }
-    PRODUTO {
-        Integer quantidadeEstoque
-    }
-    SERVICO {
-        Integer duracaoMinutos
-    }
-    ITEM_VENDA {
-        Long idItemVenda PK
-        Integer quantidade
-        BigDecimal valorUnitario
-        BigDecimal subtotal
-    }
-
-```
 
 ---
 
